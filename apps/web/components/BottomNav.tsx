@@ -1,29 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
-
-const TABS = [
-  { href: "/dashboard", label: "Accueil", icon: "🏠" },
-  { href: "/tasks", label: "Tâches", icon: "🎯" },
-  { href: "/rank", label: "Rang", icon: "🏅" },
-  { href: "/leaderboard", label: "Classement", icon: "🏆" },
-  { href: "/friends", label: "Amis", icon: "👥" },
-  { href: "/shop", label: "luavio+", icon: "✨" },
-  { href: "/profile", label: "Profil", icon: "🙋" },
-];
+import { NAV_TABS as TABS } from "@/lib/navTabs";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [soundOn, setSoundOn] = useState(true);
+  const activeRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
     setSoundOn(isSoundEnabled());
   }, []);
+
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [pathname]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -39,6 +35,7 @@ export default function BottomNav() {
             <Link
               key={tab.href}
               href={tab.href}
+              ref={active ? activeRef : undefined}
               className="flex flex-col items-center gap-0.5 font-heading text-[10px] uppercase flex-shrink-0"
               style={{ color: active ? "#6750E8" : "#9B9BAE" }}
             >
