@@ -59,7 +59,10 @@ export default function Dashboard() {
         {xpIntoLevel} / {xpForNextLevel} XP
       </p>
 
-      <button onClick={handleLogout} className="text-sm underline mt-8" style={{ color: colors.secondary }}>
+      <button onClick={() => router.push("/tasks")} className="text-sm underline mt-2" style={{ color: colors.secondary }}>
+        Tâches du jour
+      </button>
+      <button onClick={handleLogout} className="text-sm underline mt-2" style={{ color: colors.secondary }}>
         Se déconnecter
       </button>
     </main>
