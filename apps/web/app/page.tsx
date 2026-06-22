@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CATEGORIES } from "@luavio/shared";
 
 const catBg: Record<string, string> = {
@@ -32,9 +33,12 @@ export default function Home() {
       </section>
 
       <section className="text-center">
-        <button className="font-heading bg-primary border-2 border-outline rounded-sticker px-8 py-4 text-lg shadow-[0_4px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition">
+        <Link
+          href="/auth"
+          className="inline-block font-heading bg-primary border-2 border-outline rounded-sticker px-8 py-4 text-lg shadow-[0_4px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+        >
           Rejoindre la beta
-        </button>
+        </Link>
       </section>
     </main>
   );
