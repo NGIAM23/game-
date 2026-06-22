@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,16 +17,23 @@ export default function AuthPage() {
     setLoading(true);
     setMessage(null);
 
-    const { error } =
-      mode === "signup"
-        ? await supabase.auth.signUp({ email, password })
-        : await supabase.auth.signInWithPassword({ email, password });
+    if (mode === "signup") {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      setLoading(false);
+      setMessage(error ? error.message : "Compte créé ! Vérifie ton email pour confirmer.");
+      return;
+    }
 
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage(mode === "signup" ? "Compte créé ! Vérifie ton email pour confirmer." : "Connecté !");
+      router.push("/dashboard");
     }
   }
 
