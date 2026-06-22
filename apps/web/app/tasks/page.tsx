@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { CATEGORIES, categoryColors, type CategoryId } from "@luavio/shared";
+import { CATEGORIES, categoryColors, isSunday, type CategoryId } from "@luavio/shared";
 import Shell from "@/components/Shell";
+import SundayBanner from "@/components/SundayBanner";
 
 interface TaskRow {
   id: string;
@@ -110,7 +111,9 @@ export default function TasksPage() {
           {doneIds.size} / {tasks.length}
         </span>
       </div>
-      <p className="font-heading text-xl text-secondary mb-6">+{xpToday} XP aujourd'hui</p>
+      <p className="font-heading text-xl text-secondary mb-4">+{xpToday} XP aujourd'hui</p>
+
+      <SundayBanner className="mb-6" />
 
       {error ? (
         <p className="text-center">{error}</p>
@@ -121,7 +124,7 @@ export default function TasksPage() {
           {tasks.map((task, i) => {
             const category = CATEGORIES.find((c) => c.id === task.category)!;
             const isDone = doneIds.has(task.id);
-            const xp = task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp;
+            const xp = (task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp) * (isSunday() ? 2 : 1);
             return (
               <motion.button
                 key={task.id}

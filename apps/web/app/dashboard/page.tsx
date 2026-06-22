@@ -6,12 +6,16 @@ import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { levelFromTotalXp, rankFromLevel, CATEGORIES, categoryColors } from "@luavio/shared";
 import Shell from "@/components/Shell";
+import Avatar from "@/components/Avatar";
+import SundayBanner from "@/components/SundayBanner";
 
 interface Profile {
   id: string;
   pseudo: string | null;
+  avatar_seed: string | null;
   total_xp: number;
   current_streak: number;
+  sparks: number;
 }
 
 export default function Dashboard() {
@@ -32,7 +36,7 @@ export default function Dashboard() {
 
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, pseudo, total_xp, current_streak")
+        .select("id, pseudo, avatar_seed, total_xp, current_streak, sparks")
         .eq("id", session.session.user.id)
         .single();
 
@@ -86,14 +90,21 @@ export default function Dashboard() {
 
   return (
     <Shell wide>
-      <div className="font-heading text-2xl lg:text-3xl mb-1">
-        Salut, <span className="text-secondary">{profile.pseudo}</span> 👋
+      <div className="flex items-center gap-3 mb-1">
+        <Avatar seed={profile.avatar_seed || profile.pseudo || "luavio"} size={44} />
+        <div>
+          <div className="font-heading text-2xl lg:text-3xl leading-none">
+            Salut, <span className="text-secondary">{profile.pseudo}</span> 👋
+          </div>
+          <p className="font-mono text-xs uppercase tracking-widest opacity-50">
+            Jour {profile.current_streak} · Streak en cours
+          </p>
+        </div>
       </div>
-      <p className="font-mono text-xs uppercase tracking-widest opacity-50 mb-6 lg:mb-8">
-        Jour {profile.current_streak} · Streak en cours
-      </p>
 
-      <div className="grid lg:grid-cols-[1.3fr_1fr] gap-5 lg:gap-6 items-start">
+      <SundayBanner className="mt-5 mb-1" />
+
+      <div className="grid lg:grid-cols-[1.3fr_1fr] gap-5 lg:gap-6 items-start mt-6">
         {/* Level card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
@@ -147,6 +158,10 @@ export default function Dashboard() {
             <span className="font-heading text-xs bg-background border-2 border-outline rounded-full px-2.5 py-0.5">
               {doneToday} / {totalToday}
             </span>
+          </div>
+          <div className="flex items-center justify-between bg-primary border-2 border-outline rounded-sticker px-3.5 py-2.5 shadow-[0_2px_0_0_#1A1A2E]">
+            <span className="font-body font-semibold text-xs">Tes Sparks</span>
+            <span className="font-heading text-sm">⚡ {profile.sparks}</span>
           </div>
           <button
             onClick={() => router.push("/tasks")}

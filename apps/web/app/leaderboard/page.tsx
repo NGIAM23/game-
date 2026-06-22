@@ -2,20 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { levelFromTotalXp, rankFromLevel } from "@luavio/shared";
+import { levelFromTotalXp, rankFromLevel, isSunday } from "@luavio/shared";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
+import Avatar from "@/components/Avatar";
 
 interface Row {
   pseudo: string;
+  avatar_seed: string | null;
   total_xp: number;
 }
 
+interface SundayRow {
+  pseudo: string;
+  avatar_seed: string | null;
+  sunday_xp: number;
+}
+
 const PODIUM_BG = ["#FFD43B", "#E8E8E8", "#F4B98A"];
-const TABS = ["Global", "France", "Amis"];
+const TABS = ["Global", "Dimanche", "Amis"];
 
 export default function Leaderboard() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [sundayRows, setSundayRows] = useState<SundayRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
@@ -31,7 +40,7 @@ export default function Leaderboard() {
 
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("pseudo, total_xp")
+        .select("pseudo, avatar_seed, total_xp")
         .not("pseudo", "is", null)
         .order("total_xp", { ascending: false })
         .limit(10);
@@ -41,12 +50,23 @@ export default function Leaderboard() {
       } else {
         setRows(data ?? []);
       }
+
+      if (isSunday()) {
+        const { data: sundayData } = await supabase.rpc("sunday_leaderboard");
+        setSundayRows(sundayData ?? []);
+      }
+
       setLoading(false);
     }
     load();
   }, []);
 
-  const [first, second, third, ...rest] = rows;
+  const activeRows: { pseudo: string; avatar_seed: string | null; xp: number }[] =
+    tab === "Dimanche"
+      ? sundayRows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.sunday_xp }))
+      : rows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.total_xp }));
+
+  const [first, second, third, ...rest] = activeRows;
 
   return (
     <Shell wide>
@@ -60,8 +80,9 @@ export default function Leaderboard() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            title={t !== "Global" ? "Bientôt disponible" : undefined}
-            className={`flex-1 text-center font-heading text-xs py-2 rounded-full transition ${
+            title={t === "Amis" ? "Bientôt disponible" : undefined}
+            disabled={t === "Amis"}
+            className={`flex-1 text-center font-heading text-xs py-2 rounded-full transition disabled:opacity-40 ${
               tab === t ? "bg-secondary text-white" : "text-outline opacity-50 hover:opacity-80"
             }`}
           >
@@ -82,7 +103,9 @@ export default function Leaderboard() {
         <p className="text-center font-heading">Chargement...</p>
       ) : error ? (
         <p className="text-center">{error}</p>
-      ) : rows.length === 0 ? (
+      ) : tab === "Dimanche" && !isSunday() ? (
+        <p className="text-center opacity-60">La Course du Dimanche revient... dimanche. ☀️</p>
+      ) : activeRows.length === 0 ? (
         <p className="text-center opacity-60">Personne pour l'instant. Sois le premier !</p>
       ) : (
         <div className="lg:grid lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:items-start">
@@ -98,7 +121,7 @@ export default function Leaderboard() {
 
           <ol className="flex flex-col gap-2">
             {rest.map((row, i) => {
-              const { level } = levelFromTotalXp(row.total_xp);
+              const { level } = levelFromTotalXp(row.xp);
               const isMe = row.pseudo === me;
               return (
                 <motion.li
@@ -110,6 +133,7 @@ export default function Leaderboard() {
                   style={{ backgroundColor: isMe ? "#FFD43B" : "#FFFFFF" }}
                 >
                   <span className="font-heading w-8 text-center opacity-50">{i + 4}</span>
+                  <Avatar seed={row.avatar_seed || row.pseudo} size={32} />
                   <span className="flex-1 font-body font-semibold">
                     {isMe ? "Toi · " : "@"}
                     {row.pseudo}
@@ -134,7 +158,7 @@ function PodiumSpot({
   big,
   delay,
 }: {
-  row?: Row;
+  row?: { pseudo: string; avatar_seed: string | null; xp: number };
   place: number;
   bg: string;
   heightPct: number;
@@ -142,7 +166,7 @@ function PodiumSpot({
   delay: number;
 }) {
   if (!row) return <div />;
-  const { level } = levelFromTotalXp(row.total_xp);
+  const { level } = levelFromTotalXp(row.xp);
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -154,13 +178,7 @@ function PodiumSpot({
       <div className="absolute -top-3 -right-2 bg-white border-2 border-outline w-6 h-6 rounded-full flex items-center justify-center font-heading text-xs shadow-[0_2px_0_0_#1A1A2E]">
         {place === 1 ? "👑" : place}
       </div>
-      <div
-        className={`bg-white border-2 border-outline rounded-full flex items-center justify-center mb-1.5 shadow-[0_2px_0_0_#1A1A2E] ${
-          big ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl"
-        }`}
-      >
-        🧑
-      </div>
+      <Avatar seed={row.avatar_seed || row.pseudo} size={big ? 48 : 40} className="mb-1.5 shadow-[0_2px_0_0_#1A1A2E]" />
       <div className="font-heading text-xs truncate px-1 max-w-full">@{row.pseudo}</div>
       <div className="font-mono text-[10px] font-bold">Niv. {level}</div>
     </motion.div>

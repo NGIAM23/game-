@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Logo from "./Logo";
+import Avatar from "./Avatar";
 
 const TABS = [
   { href: "/dashboard", label: "Accueil", icon: "🏠" },
@@ -12,9 +14,30 @@ const TABS = [
   { href: "/leaderboard", label: "Classement", icon: "🏆" },
 ];
 
+interface MiniProfile {
+  pseudo: string | null;
+  avatar_seed: string | null;
+  sparks: number;
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [profile, setProfile] = useState<MiniProfile | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("pseudo, avatar_seed, sparks")
+        .eq("id", session.session.user.id)
+        .single();
+      if (data) setProfile(data);
+    }
+    load();
+  }, [pathname]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -23,9 +46,19 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r-[3px] border-outline bg-surface px-5 py-7">
-      <div className="mb-10 px-1">
+      <div className="mb-8 px-1">
         <Logo size={26} />
       </div>
+
+      {profile?.pseudo && (
+        <div className="flex items-center gap-2.5 mb-8 bg-background border-2 border-outline rounded-sticker p-2.5">
+          <Avatar seed={profile.avatar_seed || profile.pseudo} size={36} />
+          <div className="flex-1 overflow-hidden">
+            <div className="font-body font-semibold text-xs truncate">@{profile.pseudo}</div>
+            <div className="font-mono text-[10px] text-secondary font-semibold">⚡ {profile.sparks}</div>
+          </div>
+        </div>
+      )}
 
       <nav className="flex flex-col gap-1.5 flex-1">
         {TABS.map((tab) => {
