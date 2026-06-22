@@ -30,7 +30,13 @@ export default function Dashboard() {
         .eq("id", session.session.user.id)
         .single();
 
-      if (!error && data) setProfile(data);
+      if (!error && data) {
+        if (!data.pseudo) {
+          router.push("/onboarding");
+          return;
+        }
+        setProfile(data);
+      }
       setLoading(false);
     }
     load();
@@ -49,6 +55,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-4 px-6">
+      <p className="font-body opacity-60">@{profile.pseudo}</p>
       <h1 className="font-heading text-3xl" style={{ color: colors.outline }}>
         Niveau {level}
       </h1>
@@ -61,6 +68,9 @@ export default function Dashboard() {
 
       <button onClick={() => router.push("/tasks")} className="text-sm underline mt-2" style={{ color: colors.secondary }}>
         Tâches du jour
+      </button>
+      <button onClick={() => router.push("/leaderboard")} className="text-sm underline" style={{ color: colors.secondary }}>
+        Classement Top 10
       </button>
       <button onClick={handleLogout} className="text-sm underline mt-2" style={{ color: colors.secondary }}>
         Se déconnecter
