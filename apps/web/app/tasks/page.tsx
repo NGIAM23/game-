@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { CATEGORIES, type CategoryId } from "@luavio/shared";
+import Nav from "@/components/Nav";
 
 interface TaskRow {
   id: string;
@@ -22,6 +23,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState<string | null>(null);
   const [xpToday, setXpToday] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -31,15 +33,21 @@ export default function TasksPage() {
         return;
       }
 
-      const { data: allTasks } = await supabase
+      const { data: allTasks, error: tasksError } = await supabase
         .from("tasks")
         .select("id, category, label, base_xp")
         .limit(DAILY_COUNT);
 
-      const { data: completions } = await supabase
+      const { data: completions, error: completionsError } = await supabase
         .from("task_completions")
         .select("task_id, xp_awarded")
         .eq("completed_on", new Date().toISOString().slice(0, 10));
+
+      if (tasksError || completionsError) {
+        setError("Impossible de charger les tâches. Réessaie.");
+        setLoading(false);
+        return;
+      }
 
       setTasks(allTasks ?? []);
       setDoneIds(new Set((completions ?? []).map((c) => c.task_id)));
@@ -51,10 +59,10 @@ export default function TasksPage() {
 
   async function completeTask(taskId: string) {
     setPending(taskId);
-    const { data: xpAwarded, error } = await supabase.rpc("complete_task", { p_task_id: taskId });
+    const { data: xpAwarded, error: rpcError } = await supabase.rpc("complete_task", { p_task_id: taskId });
     setPending(null);
 
-    if (!error && typeof xpAwarded === "number") {
+    if (!rpcError && typeof xpAwarded === "number") {
       setDoneIds((prev) => new Set(prev).add(taskId));
       setXpToday((prev) => prev + xpAwarded);
     }
@@ -63,37 +71,42 @@ export default function TasksPage() {
   if (loading) return <main className="min-h-screen flex items-center justify-center">Chargement...</main>;
 
   return (
-    <main className="min-h-screen px-6 py-12 max-w-xl mx-auto">
-      <h1 className="font-heading text-3xl text-center mb-2 text-secondary">+{xpToday} XP aujourd'hui</h1>
-      <p className="text-center text-sm opacity-60 mb-8">Tâches du jour</p>
+    <main className="min-h-screen px-6">
+      <Nav />
+      <div className="max-w-xl mx-auto py-8">
+        <h1 className="font-heading text-3xl text-center mb-2 text-secondary">+{xpToday} XP aujourd'hui</h1>
+        <p className="text-center text-sm opacity-60 mb-8">Tâches du jour</p>
 
-      <div className="flex flex-col gap-3">
-        {tasks.map((task) => {
-          const category = CATEGORIES.find((c) => c.id === task.category)!;
-          const isDone = doneIds.has(task.id);
-          return (
-            <button
-              key={task.id}
-              disabled={isDone || pending === task.id}
-              onClick={() => completeTask(task.id)}
-              className="flex items-center gap-3 bg-surface border-2 border-outline rounded-sticker p-4 text-left disabled:opacity-50"
-            >
-              <span className="text-2xl">{category.icon}</span>
-              <span className="flex-1">
-                <span className="block font-body font-semibold">{task.label}</span>
-                <span className="block text-xs opacity-60">
-                  +{task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp} XP
-                </span>
-              </span>
-              <span className="text-xl">{isDone ? "✅" : "⬜"}</span>
-            </button>
-          );
-        })}
+        {error ? (
+          <p className="text-center">{error}</p>
+        ) : tasks.length === 0 ? (
+          <p className="text-center opacity-60">Aucune tâche disponible pour le moment.</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {tasks.map((task) => {
+              const category = CATEGORIES.find((c) => c.id === task.category)!;
+              const isDone = doneIds.has(task.id);
+              return (
+                <button
+                  key={task.id}
+                  disabled={isDone || pending === task.id}
+                  onClick={() => completeTask(task.id)}
+                  className="flex items-center gap-3 bg-surface border-2 border-outline rounded-sticker p-4 text-left disabled:opacity-50"
+                >
+                  <span className="text-2xl">{category.icon}</span>
+                  <span className="flex-1">
+                    <span className="block font-body font-semibold">{task.label}</span>
+                    <span className="block text-xs opacity-60">
+                      +{task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp} XP
+                    </span>
+                  </span>
+                  <span className="text-xl">{isDone ? "✅" : "⬜"}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
-
-      <button onClick={() => router.push("/dashboard")} className="block mx-auto text-sm underline text-secondary mt-8">
-        Voir mon profil
-      </button>
     </main>
   );
 }

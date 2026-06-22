@@ -18,13 +18,21 @@ export default function AuthPage() {
     setMessage(null);
 
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       setLoading(false);
-      setMessage(error ? error.message : "Compte créé ! Vérifie ton email pour confirmer.");
+      if (error) {
+        setMessage(error.message);
+        return;
+      }
+      if (data.session) {
+        router.push("/onboarding");
+        return;
+      }
+      setMessage("Compte créé ! Vérifie ton email pour confirmer, puis reviens te connecter.");
       return;
     }
 
