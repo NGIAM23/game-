@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>luavio — Maquette V1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0A0A;
+  --bg-elev: #131313;
+  --bg-elev-2: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #FAFAFA;
+  --text-dim: #888;
+  --text-muted: #555;
+  --accent: #C6FF00;        /* vert lime */
+  --accent-2: #FF3B30;      /* rouge alt */
+  --accent-3: #FF6B00;      /* orange alt */
+  --success: #34D399;
+  --warn: #FBBF24;
+  --display: 'Instrument Serif', serif;
+  --sans: 'Space Grotesk', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01';
+}
+
+/* ========= LAYOUT ========= */
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 32px 120px;
+}
+
+.intro {
+  margin-bottom: 80px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.intro-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.intro h1 {
+  font-family: var(--display);
+  font-size: clamp(48px, 6vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+}
+.intro h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.intro p {
+  font-size: 18px;
+  color: var(--text-dim);
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 64px 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.phones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 32px;
+  align-items: start;
+}
+
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.phone-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* ========= PHONE FRAME ========= */
+.phone {
+  width: 380px;
+  height: 800px;
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: 48px;
+  padding: 12px;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 40px 80px -20px rgba(0,0,0,0.6),
+    inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 28px;
+  background: #050505;
+  border-radius: 20px;
+  z-index: 10;
+}
+.screen {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========= STATUS BAR ========= */
+.status {
+  padding: 14px 24px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  height: 44px;
+}
+.status-right { display: flex; gap: 6px; align-items: center; }
+
+/* ========= CONTENT SCROLL ========= */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 20px 90px;
+}
+.content::-webkit-scrollbar { width: 0; }
+
+/* ========= HOME SCREEN ========= */
+.greet {
+  font-family: var(--display);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+.greet em { font-style: italic; color: var(--accent); }
+.greet-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 24px;
+}
+
+/* level card */
+.level-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.level-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(198, 255, 0, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.level-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.level-rank {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(198, 255, 0, 0.1);
+  border: 1px solid rgba(198, 255, 0, 0.3);
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.level-streak {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent-3);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.level-num {
+  font-family: var(--display);
+  font-size: 84px;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  margin-bottom: 8px;
+  font-feature-settings: 'lnum';
+}
+.level-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 16px;
+}
+.xp-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 64%;
+  border-radius: 100px;
+  box-shadow: 0 0 16px rgba(198, 255, 0, 0.6);
+}
+.xp-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  display: flex;
+  justify-content: space-between;
+}
+.xp-text strong { color: var(--text); font-weight: 500; }
+
+/* Today section */
+.section-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 24px 0 12px;
+}
+.section-h h2 {
+  font-family: var(--display);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+.section-h .pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--bg-elev);
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+
+.task {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+.task:hover { transform: translateX(2px); border-color: #444; }
+.task-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--bg-elev-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.task-icon.body { background: rgba(255, 59, 48, 0.12); }
+.task-icon.mind { background: rgba(64, 156, 255, 0.12); }
+.task-icon.altru { background: rgba(198, 255, 0, 0.12); }
+.task-icon.prod { background: rgba(255, 107, 0, 0.12); }
+.task-info { flex: 1; min-width: 0; }
+.task-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.task-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  display: flex;
+  gap: 8px;
+}
+.task-xp {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.task.done {
+  opacity: 0.5;
+}
+.task.done .task-title { text-decoration: line-through; }
+.task.done .task-xp::before { content: '✓ '; }
+
+/* sunday banner */
+.sunday-banner {
+  background: linear-gradient(90deg, #FF3B30 0%, #FF6B00 100%);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.sunday-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2), transparent 50%);
+  pointer-events: none;
+}
+.sunday-icon { font-size: 24px; }
+.sunday-text { flex: 1; }
+.sunday-title {
+  font-family: var(--display);
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.sunday-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ========= TAB BAR ========= */
+.tabbar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(13, 13, 13, 0.85);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 0 28px;
+  z-index: 5;
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tab.active { color: var(--accent); }
+.tab svg { width: 22px; height: 22px; }
+.tab-cta {
+  background: var(--accent);
+  color: var(--bg);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -24px;
+  box-shadow: 0 8px 24px rgba(198, 255, 0, 0.4);
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* ========= PROFILE SCREEN ========= */
+.profile-top {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+.avatar-frame {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%);
+  padding: 3px;
+  margin: 0 auto 16px;
+  position: relative;
+}
+.avatar-frame::before {
+  content: 'LVL 47';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--accent);
+  letter-spacing: 0.1em;
+}
+.avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--bg-elev-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 54px;
+}
+.profile-pseudo {
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  margin-top: 12px;
+}
+.profile-handle {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.qr-block {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+.qr-img {
+  width: 140px;
+  height: 140px;
+  background: #fff;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  padding: 10px;
+  position: relative;
+}
+.qr-img svg { width: 100%; height: 100%; }
+.qr-cta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 4px;
+}
+.qr-link {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.qr-merch-btn {
+  display: inline-block;
+  margin-top: 8px;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid var(--accent);
+  padding: 8px 14px;
+  border-radius: 100px;
+}
+
+/* stats radar */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.stat {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+}
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.stat-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.stat-icon { font-size: 14px; }
+.stat-val {
+  font-family: var(--display);
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stat-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 100px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.stat-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 100px;
+}
+
+.duel-stat {
+  background: linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,107,0,0.05));
+  border: 1px solid rgba(255,107,0,0.3);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.duel-stat-left {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent-3);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+.duel-stat-val {
+  font-family: var(--display);
+  font-size: 28px;
+  color: #fff;
+}
+
+/* ========= LEADERBOARD SCREEN ========= */
+.lb-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0;
+  background: var(--bg-elev);
+  border-radius: 100px;
+  padding: 4px;
+}
+.lb-tab {
+  flex: 1;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 8px;
+  border-radius: 100px;
+  color: var(--text-dim);
+}
+.lb-tab.active {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.lb-rank {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 28px;
+  text-align: center;
+}
+.lb-rank.gold { color: #FFD700; }
+.lb-rank.silver { color: #C0C0C0; }
+.lb-rank.bronze { color: #CD7F32; }
+.lb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elev-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.lb-info { flex: 1; min-width: 0; }
+.lb-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.lb-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.lb-xp {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.lb-you {
+  background: linear-gradient(90deg, rgba(198, 255, 0, 0.08), transparent);
+  border-radius: 12px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  bottom: 90px;
+  margin: 8px 0;
+}
+
+/* ========= DECISIONS PANEL ========= */
+.decisions {
+  margin-top: 100px;
+}
+.decisions h2 {
+  font-family: var(--display);
+  font-size: 48px;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+.decisions h2 em { font-style: italic; color: var(--accent); }
+.decisions > p {
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+.decision-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+}
+.dec-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+}
+.dec-title {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.dec-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.dec-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dec-opt {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 100px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+.dec-opt.reco {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.dec-opt.reco::after { content: ' ✓'; }
+
+.color-swatches {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  position: relative;
+}
+.swatch.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--bg), 0 0 0 3px var(--accent);
+}
+.swatch.lime { background: #C6FF00; }
+.swatch.orange { background: #FF6B00; }
+.swatch.red { background: #FF3B30; }
+.swatch.cyan { background: #00E5FF; }
+.swatch.violet { background: #B388FF; }
+
+/* footer */
+.foot {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* responsive */
+@media (max-width: 880px) {
+  .phone { transform: scale(0.85); transform-origin: top center; margin-bottom: -120px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- INTRO -->
+  <section class="intro">
+    <div class="intro-eyebrow">Maquette V1 — Direction artistique C</div>
+    <h1>luavio.<br>Le jeu de <em>la vraie vie</em>.</h1>
+    <p>Aperçu visuel de l'application. Couleurs, typo, composition, ton.
+    Examine, dis ce qui marche, ce qui te dérange. On itère jusqu'à validation.</p>
+  </section>
+
+  <!-- PHONES -->
+  <h3 class="section-title">— Écrans principaux</h3>
+
+  <div class="phones-grid">
+
+    <!-- HOME -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status">
+            <span>9:41</span>
+            <span class="status-right">●●● ◗ 92</span>
+          </div>
+          <div class="content">
+            <div class="greet">Salut, <em>Maxou</em></div>
+            <div class="greet-sub">— Jour 23 / Streak en cours</div>
+
+            <div class="level-card">
+              <div class="level-top">
+                <div class="level-rank">Or II</div>
+                <div class="level-streak">🔥 23</div>
+              </div>
+              <div class="level-num">47</div>
+              <div class="level-label">Niveau · 1240 XP cette semaine</div>
+              <div class="xp-bar"><div class="xp-bar-fill"></div></div>
+              <div class="xp-text">
+                <span>Niveau 47</span>
+                <span><strong>3 200</strong> / 5 000 XP</span>
+              </div>
+            </div>
+
+            <div class="sunday-banner">
+              <div class="sunday-icon">⚡</div>
+              <div class="sunday-text">
+                <div class="sunday-title">Course du Dimanche</div>
+                <div class="sunday-sub">XP ×2 · dans 3 jours</div>
+              </div>
+            </div>
+
+            <div class="section-h">
+              <h2>Aujourd'hui</h2>
+              <span class="pill">2 / 3</span>
+            </div>
+
+            <div class="task done">
+              <div class="task-icon body">💪</div>
+              <div class="task-info">
+                <div class="task-title">Séance de sport ≥ 20 min</div>
+                <div class="task-meta"><span>Corps</span><span>·</span><span>Validé</span></div>
+              </div>
+              <div class="task-xp">+80</div>
+            </div>
+
+            <div class="task done">
+              <div class="task-icon altru">🌿</div>
+              <div class="task-info">
+                <div class="task-title">Ramasser un déchet</div>
+                <div class="task-meta"><span>Altruisme</span><span>·</span><span>Validé</span></div>
+              </div>
+              <div class="task-xp">+40</div>
+            </div>
+
+            <div class="task">
+              <div class="task-icon mind">📖</div>
+              <div class="task-info">
+                <div class="task-title">Lire 30 minutes</div>
+                <div class="task-meta"><span>Esprit</span><span>·</span><span>Facile</span></div>
+              </div>
+              <div class="task-xp">+60</div>
+            </div>
+
+            <div class="section-h">
+              <h2>Cette semaine</h2>
+              <span class="pill">3 / 5</span>
+            </div>
+
+            <div class="task">
+              <div class="task-icon prod">💼</div>
+              <div class="task-info">
+                <div class="task-title">Boîte mail à zéro</div>
+                <div class="task-meta"><span>Productivité</span></div>
+              </div>
+              <div class="task-xp">+150</div>
+            </div>
+
+            <div class="task">
+              <div class="task-icon body">🏃</div>
+              <div class="task-info">
+                <div class="task-title">5 séances de sport</div>
+                <div class="task-meta"><span>Corps</span><span>·</span><span>3/5</span></div>
+              </div>
+              <div class="task-xp">+300</div>
+            </div>
+
+          </div>
+
+          <div class="tabbar">
+            <div class="tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Home
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+              Rang
+            </div>
+            <div class="tab-cta">+</div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-1 4 8.5 8.5 0 0 1-7.6 4.5 8.4 8.4 0 0 1-4-1L3 21l2-5.4a8.5 8.5 0 0 1 16-4z"/></svg>
+              Social
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              Moi
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Accueil · Tâches du jour</div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status">
+            <span>9:41</span>
+            <span class="status-right">●●● ◗ 92</span>
+          </div>
+          <div class="content">
+            <div class="profile-top">
+              <div class="avatar-frame"><div class="avatar-inner">🧑‍🦱</div></div>
+              <div class="profile-pseudo">Maxou</div>
+              <div class="profile-handle">@maxou · Or II · La Seyne 🇫🇷</div>
+            </div>
+
+            <div class="qr-block">
+              <div class="qr-cta">Scanne pour me suivre</div>
+              <div class="qr-img">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#fff"/>
+                  <g fill="#000">
+                    <rect x="0" y="0" width="30" height="30"/>
+                    <rect x="5" y="5" width="20" height="20" fill="#fff"/>
+                    <rect x="10" y="10" width="10" height="10"/>
+                    <rect x="70" y="0" width="30" height="30"/>
+                    <rect x="75" y="5" width="20" height="20" fill="#fff"/>
+                    <rect x="80" y="10" width="10" height="10"/>
+                    <rect x="0" y="70" width="30" height="30"/>
+                    <rect x="5" y="75" width="20" height="20" fill="#fff"/>
+                    <rect x="10" y="80" width="10" height="10"/>
+                    <rect x="40" y="0" width="5" height="5"/>
+                    <rect x="50" y="0" width="5" height="5"/>
+                    <rect x="35" y="10" width="5" height="5"/>
+                    <rect x="45" y="15" width="5" height="5"/>
+                    <rect x="55" y="10" width="5" height="5"/>
+                    <rect x="60" y="20" width="5" height="5"/>
+                    <rect x="0" y="40" width="5" height="5"/>
+                    <rect x="10" y="40" width="5" height="5"/>
+                    <rect x="20" y="45" width="5" height="5"/>
+                    <rect x="30" y="40" width="5" height="5"/>
+                    <rect x="40" y="40" width="5" height="5"/>
+                    <rect x="50" y="50" width="5" height="5"/>
+                    <rect x="60" y="40" width="5" height="5"/>
+                    <rect x="70" y="45" width="5" height="5"/>
+                    <rect x="80" y="40" width="5" height="5"/>
+                    <rect x="90" y="50" width="5" height="5"/>
+                    <rect x="40" y="60" width="5" height="5"/>
+                    <rect x="55" y="65" width="5" height="5"/>
+                    <rect x="65" y="60" width="5" height="5"/>
+                    <rect x="75" y="70" width="5" height="5"/>
+                    <rect x="85" y="65" width="5" height="5"/>
+                    <rect x="95" y="60" width="5" height="5"/>
+                    <rect x="40" y="80" width="5" height="5"/>
+                    <rect x="50" y="80" width="5" height="5"/>
+                    <rect x="60" y="90" width="5" height="5"/>
+                    <rect x="70" y="80" width="5" height="5"/>
+                    <rect x="85" y="85" width="5" height="5"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="qr-link">luavio.app/u/maxou</div>
+              <a class="qr-merch-btn" href="#">→ Commander mon merch</a>
+            </div>
+
+            <div class="duel-stat">
+              <div class="duel-stat-left">Duels gagnés</div>
+              <div class="duel-stat-val">12 <span style="color:var(--text-muted);font-size:14px;">/ 18</span></div>
+            </div>
+
+            <div class="section-h">
+              <h2>Stats</h2>
+              <span class="pill">6 catégories</span>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">Corps</span><span class="stat-icon">💪</span></div>
+                <div class="stat-val">52</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:80%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">Esprit</span><span class="stat-icon">🧠</span></div>
+                <div class="stat-val">38</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:55%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">Social</span><span class="stat-icon">❤️</span></div>
+                <div class="stat-val">44</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:65%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">Altruisme</span><span class="stat-icon">🤝</span></div>
+                <div class="stat-val">61</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:92%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">Prod.</span><span class="stat-icon">💼</span></div>
+                <div class="stat-val">35</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:48%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">Création</span><span class="stat-icon">🎨</span></div>
+                <div class="stat-val">29</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:40%"></div></div>
+              </div>
+            </div>
+
+          </div>
+          <div class="tabbar">
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Home
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+              Rang
+            </div>
+            <div class="tab-cta">+</div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-1 4 8.5 8.5 0 0 1-7.6 4.5 8.4 8.4 0 0 1-4-1L3 21l2-5.4a8.5 8.5 0 0 1 16-4z"/></svg>
+              Social
+            </div>
+            <div class="tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              Moi
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Profil · QR · Stats</div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status">
+            <span>9:41</span>
+            <span class="status-right">●●● ◗ 92</span>
+          </div>
+          <div class="content">
+            <div class="greet">Le <em>rang</em></div>
+            <div class="greet-sub">— Saison · Mai 2026</div>
+
+            <div class="lb-tabs">
+              <div class="lb-tab">Monde</div>
+              <div class="lb-tab">France</div>
+              <div class="lb-tab active">La Seyne</div>
+              <div class="lb-tab">Amis</div>
+            </div>
+
+            <div class="lb-row">
+              <div class="lb-rank gold">1</div>
+              <div class="lb-avatar">🧝</div>
+              <div class="lb-info">
+                <div class="lb-name">elina</div>
+                <div class="lb-meta">Légende · Streak 87</div>
+              </div>
+              <div class="lb-xp">42 180</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank silver">2</div>
+              <div class="lb-avatar">🦸</div>
+              <div class="lb-info">
+                <div class="lb-name">thomas.b</div>
+                <div class="lb-meta">Grand Maître · Streak 64</div>
+              </div>
+              <div class="lb-xp">38 420</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank bronze">3</div>
+              <div class="lb-avatar">🧑‍🎤</div>
+              <div class="lb-info">
+                <div class="lb-name">lina_marine</div>
+                <div class="lb-meta">Maître · Streak 41</div>
+              </div>
+              <div class="lb-xp">31 050</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">4</div>
+              <div class="lb-avatar">🧑</div>
+              <div class="lb-info">
+                <div class="lb-name">paul92</div>
+                <div class="lb-meta">Maître · Streak 22</div>
+              </div>
+              <div class="lb-xp">28 700</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">5</div>
+              <div class="lb-avatar">👩</div>
+              <div class="lb-info">
+                <div class="lb-name">sara.r</div>
+                <div class="lb-meta">Diamant · Streak 19</div>
+              </div>
+              <div class="lb-xp">24 100</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">6</div>
+              <div class="lb-avatar">🧔</div>
+              <div class="lb-info">
+                <div class="lb-name">karim.83</div>
+                <div class="lb-meta">Diamant</div>
+              </div>
+              <div class="lb-xp">22 880</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">7</div>
+              <div class="lb-avatar">🧑‍🦰</div>
+              <div class="lb-info">
+                <div class="lb-name">nina_v</div>
+                <div class="lb-meta">Diamant</div>
+              </div>
+              <div class="lb-xp">21 410</div>
+            </div>
+
+            <div class="lb-you">
+              <div class="lb-row" style="border:none; padding:0;">
+                <div class="lb-rank" style="color:var(--accent);">12</div>
+                <div class="lb-avatar" style="border:2px solid var(--accent);">🧑‍🦱</div>
+                <div class="lb-info">
+                  <div class="lb-name" style="color:var(--accent);">Toi · Maxou</div>
+                  <div class="lb-meta">Or II · Streak 23</div>
+                </div>
+                <div class="lb-xp">15 240</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="tabbar">
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Home
+            </div>
+            <div class="tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+              Rang
+            </div>
+            <div class="tab-cta">+</div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-1 4 8.5 8.5 0 0 1-7.6 4.5 8.4 8.4 0 0 1-4-1L3 21l2-5.4a8.5 8.5 0 0 1 16-4z"/></svg>
+              Social
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              Moi
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Classement · La Seyne</div>
+    </div>
+
+  </div>
+
+  <!-- DECISIONS -->
+  <div class="decisions">
+    <h2>À <em>valider</em> ou changer.</h2>
+    <p>Regarde la maquette ci-dessus. Pour chaque point, dis-moi : OK, changement, ou aucune idée → je tranche. Réponds en bloc dans ton prochain message.</p>
+
+    <div class="decision-grid">
+
+      <div class="decision-card">
+        <div class="dec-num">— 01</div>
+        <div class="dec-title">Couleur d'accent</div>
+        <div class="dec-desc">L'accent principal partout (boutons, XP, highlights). Reco : vert lime, énergie + santé + différencie Strava.</div>
+        <div class="color-swatches">
+          <div class="swatch lime active" title="C6FF00 — Vert Lime (reco)"></div>
+          <div class="swatch orange" title="FF6B00 — Orange"></div>
+          <div class="swatch red" title="FF3B30 — Rouge"></div>
+          <div class="swatch cyan" title="00E5FF — Cyan"></div>
+          <div class="swatch violet" title="B388FF — Violet"></div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 02</div>
+        <div class="dec-title">Couleur de fond</div>
+        <div class="dec-desc">Sombre par défaut (économique batterie OLED, gen Z, élégant). Light mode plus tard si demandé.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Dark only V1</div>
+          <div class="dec-opt">Dark + Light V1</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 03</div>
+        <div class="dec-title">Typographie</div>
+        <div class="dec-desc">Display = Instrument Serif (élégant, signature). Body = Space Grotesk. Mono = JetBrains.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Instrument Serif + Space Grotesk</div>
+          <div class="dec-opt">Plus neutre (Inter)</div>
+          <div class="dec-opt">Plus brutaliste</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 04</div>
+        <div class="dec-title">Catégories XP</div>
+        <div class="dec-desc">6 stats : Corps, Esprit, Social, Altruisme, Productivité, Création. Détox écran intégrée à Esprit.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">6 stats</div>
+          <div class="dec-opt">7 (+ Détox)</div>
+          <div class="dec-opt">5 (- Création)</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 05</div>
+        <div class="dec-title">Monnaie premium</div>
+        <div class="dec-desc">Achetable seulement, sert aux cosmétiques, re-rolls, boosts. Jamais à acheter de l'XP.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Sparks ⚡</div>
+          <div class="dec-opt">Lumens</div>
+          <div class="dec-opt">Crystals</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 06</div>
+        <div class="dec-title">Nom du pass</div>
+        <div class="dec-desc">Abonnement mensuel premium (~3,99-4,99 €).</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">luavio+</div>
+          <div class="dec-opt">luavio Pro</div>
+          <div class="dec-opt">luavio Premium</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 07</div>
+        <div class="dec-title">Avatar</div>
+        <div class="dec-desc">DiceBear : librairie open source d'avatars 2D, illimités, customisables. Gratuit.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">DiceBear Avataaars</div>
+          <div class="dec-opt">Ready Player Me 2D</div>
+          <div class="dec-opt">Emoji simple</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 08</div>
+        <div class="dec-title">Vérification IA V1</div>
+        <div class="dec-desc">Gemini Flash gratuit (15 req/min, 1500/jour). Bascule Claude Haiku quand traction.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Gemini Flash (free)</div>
+          <div class="dec-opt">Claude Haiku</div>
+          <div class="dec-opt">GPT-4o-mini</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 09</div>
+        <div class="dec-title">KYC V1</div>
+        <div class="dec-desc">Yoti Age Estimation : selfie → IA estime l'âge. Gratuit. Filtre mineurs/majeurs pour features sociales.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Yoti (free)</div>
+          <div class="dec-opt">Veriff payant</div>
+          <div class="dec-opt">Auto-déclaratif</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 10</div>
+        <div class="dec-title">Langue V1</div>
+        <div class="dec-desc">Français only V1 (pilote France). i18n prête dans le code pour ajouter anglais V2.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">FR only</div>
+          <div class="dec-opt">FR + EN</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 11</div>
+        <div class="dec-title">Stockage photos</div>
+        <div class="dec-desc">Compression côté client < 1 Mo, Supabase Storage EU, suppression auto à 30j (sauf galerie opt-in).</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Supabase + auto-delete 30j</div>
+          <div class="dec-opt">Garder tout</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 12</div>
+        <div class="dec-title">Domaine + handles</div>
+        <div class="dec-desc">Réserver luavio.com, .app, .fr + @luavio sur tous les réseaux. ~15 €/an.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Réserver tout cette semaine</div>
+          <div class="dec-opt">Attendre nom final</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 13</div>
+        <div class="dec-title">Comptes dev</div>
+        <div class="dec-desc">Apple Developer 99 $/an + Google Play 25 $ one-shot. ~110 € total. Validation 1-2 jours.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Les deux maintenant</div>
+          <div class="dec-opt">Android d'abord</div>
+          <div class="dec-opt">Plus tard</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 14</div>
+        <div class="dec-title">Ton téléphone de test</div>
+        <div class="dec-desc">Pour Expo Go pendant le dev. iPhone ou Android ? Les deux idéal.</div>
+        <div class="dec-options">
+          <div class="dec-opt">iPhone</div>
+          <div class="dec-opt">Android</div>
+          <div class="dec-opt">Les deux</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 15</div>
+        <div class="dec-title">Légal V1</div>
+        <div class="dec-desc">CGU + Privacy via générateur (Termly/iubenda) gratuit/30 €/an. Revue avocat à 1k DAU.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">DIY générateur V1</div>
+          <div class="dec-opt">Avocat dès V1</div>
+        </div>
+      </div>
+
+      <div class="decision-card" style="background:linear-gradient(135deg, rgba(198,255,0,0.08), rgba(198,255,0,0.02));border-color:rgba(198,255,0,0.3);">
+        <div class="dec-num" style="color:var(--accent);">— Ressenti</div>
+        <div class="dec-title">L'esprit visuel global ?</div>
+        <div class="dec-desc">Dark + Instrument Serif italic + accent lime + composition aérée + mono pour les chiffres. Sportif premium, pas RPG.</div>
+        <div class="dec-options">
+          <div class="dec-opt">Je valide</div>
+          <div class="dec-opt">Trop sombre</div>
+          <div class="dec-opt">Trop élégant</div>
+          <div class="dec-opt">Pas assez fun</div>
+          <div class="dec-opt">Autre</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="foot">
+    luavio · maquette v0.1 · direction artistique C · à itérer
+  </div>
+
+</div>
+
+</body>
+</html>

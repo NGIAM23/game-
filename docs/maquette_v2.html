@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>luavio — Maquette V2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Palette claire — jaune + violet profond accent secondaire + blanc */
+  --bg: #FFF8E7;            /* fond crème chaud */
+  --bg-2: #FFFFFF;           /* surfaces */
+  --bg-3: #FFF3D1;           /* élévation */
+  --border: #1A1A2E;         /* contours marqués (style Clash, dark cartoon) */
+  --border-soft: #E8DCB4;
+  --text: #1A1A2E;
+  --text-dim: #5E5E73;
+  --text-muted: #9B9BAE;
+  --yellow: #FFD43B;         /* jaune principal, doux */
+  --yellow-d: #F4B400;       /* jaune deep pour ombres */
+  --purple: #6750E8;         /* 2e couleur — violet vif, ressort sur jaune */
+  --purple-d: #4731B8;
+  --red: #FF5252;
+  --green: #2ED573;
+  --blue: #5BC0EB;
+  --pink: #FF7AB6;
+
+  --display: 'Lilita One', cursive;
+  --sans: 'Fredoka', sans-serif;
+  --mono: 'DM Mono', monospace;
+
+  --shadow-card: 0 4px 0 var(--border);
+  --shadow-btn: 0 3px 0 var(--border);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(103, 80, 232, 0.06) 0%, transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(255, 212, 59, 0.18) 0%, transparent 35%);
+  background-attachment: fixed;
+}
+
+/* ========= LAYOUT ========= */
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 32px 120px;
+}
+
+.intro {
+  margin-bottom: 60px;
+  padding-bottom: 40px;
+  border-bottom: 2px dashed var(--border-soft);
+}
+.intro-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--purple);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  background: #fff;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-btn);
+}
+.intro h1 {
+  font-family: var(--display);
+  font-size: clamp(56px, 8vw, 104px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  margin-top: 24px;
+  margin-bottom: 20px;
+  color: var(--text);
+  text-shadow: 4px 4px 0 var(--yellow);
+}
+.intro h1 .pop {
+  color: var(--purple);
+  display: inline-block;
+  transform: rotate(-2deg);
+}
+.intro p {
+  font-size: 18px;
+  color: var(--text-dim);
+  max-width: 620px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 56px 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed var(--border-soft);
+}
+
+.phones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 32px;
+  align-items: start;
+  justify-items: center;
+}
+
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.phone-label {
+  font-family: var(--display);
+  font-size: 16px;
+  color: var(--text);
+  margin-top: 16px;
+  letter-spacing: 0.02em;
+  background: var(--yellow);
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-btn);
+}
+
+/* ========= PHONE FRAME ========= */
+.phone {
+  width: 380px;
+  height: 800px;
+  background: var(--border);
+  border-radius: 48px;
+  padding: 12px;
+  position: relative;
+  box-shadow:
+    0 8px 0 #0a0a18,
+    0 24px 48px -8px rgba(26, 26, 46, 0.3);
+}
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 28px;
+  background: var(--border);
+  border-radius: 20px;
+  z-index: 10;
+}
+.screen {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========= STATUS BAR ========= */
+.status {
+  padding: 14px 24px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  height: 44px;
+  color: var(--text);
+}
+.status-right { display: flex; gap: 6px; align-items: center; }
+
+/* ========= CONTENT SCROLL ========= */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 20px 100px;
+}
+.content::-webkit-scrollbar { width: 0; }
+
+/* ========= HOME SCREEN ========= */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0 16px;
+}
+.top-greet {
+  font-family: var(--display);
+  font-size: 24px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.top-greet span { color: var(--purple); }
+.top-icons {
+  display: flex;
+  gap: 6px;
+}
+.top-icon {
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 0 var(--border);
+}
+.top-icon.sparks {
+  background: var(--yellow);
+  width: auto;
+  padding: 0 12px;
+  font-family: var(--display);
+  font-size: 14px;
+  gap: 4px;
+}
+
+/* level card */
+.level-card {
+  background: var(--purple);
+  border: 3px solid var(--border);
+  border-radius: 24px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 5px 0 var(--border);
+  color: #fff;
+}
+.level-card::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255, 212, 59, 0.4), transparent 60%);
+  pointer-events: none;
+}
+.level-card::before {
+  content: '★';
+  position: absolute;
+  bottom: -14px; right: -8px;
+  font-size: 80px;
+  color: rgba(255,255,255,0.06);
+  pointer-events: none;
+}
+.level-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+.level-rank {
+  font-family: var(--display);
+  font-size: 13px;
+  color: var(--border);
+  background: var(--yellow);
+  border: 2px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 0 var(--border);
+}
+.level-streak {
+  font-family: var(--display);
+  font-size: 15px;
+  color: var(--yellow);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: rgba(0,0,0,0.25);
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+}
+.level-num {
+  font-family: var(--display);
+  font-size: 80px;
+  line-height: 0.9;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+  color: #fff;
+  text-shadow: 0 3px 0 var(--purple-d), 0 6px 12px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 1;
+}
+.level-label {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.xp-bar {
+  height: 14px;
+  background: rgba(0,0,0,0.35);
+  border: 2px solid var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  position: relative;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--yellow), #FFE066);
+  width: 64%;
+  border-right: 2px solid var(--border);
+  position: relative;
+}
+.xp-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 1px; left: 4px; right: 4px; height: 3px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 100px;
+}
+.xp-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  justify-content: space-between;
+}
+.xp-text strong { color: var(--yellow); font-weight: 600; }
+
+/* sunday banner */
+.sunday-banner {
+  background: var(--yellow);
+  border: 3px solid var(--border);
+  border-radius: 20px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  box-shadow: 0 4px 0 var(--border);
+}
+.sunday-banner .lightning {
+  width: 42px; height: 42px;
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 2px 0 var(--border);
+  flex-shrink: 0;
+}
+.sunday-text { flex: 1; }
+.sunday-title {
+  font-family: var(--display);
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.sunday-sub {
+  font-size: 11px;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.sunday-chev {
+  font-family: var(--display);
+  font-size: 22px;
+  color: var(--text);
+}
+
+/* Today section */
+.section-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 10px;
+}
+.section-h h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+.section-h .pill {
+  font-family: var(--display);
+  font-size: 12px;
+  color: var(--text);
+  background: #fff;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+  box-shadow: 0 2px 0 var(--border);
+}
+
+.task {
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 3px 0 var(--border);
+  transition: all 0.15s;
+}
+.task:active { transform: translateY(3px); box-shadow: 0 0 0 var(--border); }
+.task-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 2px solid var(--border);
+  box-shadow: 0 2px 0 var(--border);
+}
+.task-icon.body { background: var(--red); }
+.task-icon.mind { background: var(--blue); }
+.task-icon.altru { background: var(--green); }
+.task-icon.prod { background: #FFA94D; }
+.task-icon.social { background: var(--pink); }
+.task-icon.create { background: var(--purple); }
+.task-icon.detox { background: var(--yellow); }
+.task-info { flex: 1; min-width: 0; }
+.task-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 2px;
+  color: var(--text);
+}
+.task-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+}
+.task-xp {
+  font-family: var(--display);
+  font-size: 16px;
+  color: var(--text);
+  white-space: nowrap;
+  background: var(--yellow);
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 2px solid var(--border);
+  box-shadow: 0 2px 0 var(--border);
+}
+.task.done {
+  background: #F0EAD2;
+  opacity: 0.75;
+}
+.task.done .task-title { text-decoration: line-through; color: var(--text-dim); }
+.task.done .task-xp { background: var(--green); color: #fff; }
+.task.done .task-xp::before { content: '✓ '; }
+
+/* ========= TAB BAR ========= */
+.tabbar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-2);
+  border-top: 3px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0 28px;
+  z-index: 5;
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-muted);
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.tab.active { color: var(--purple); }
+.tab svg { width: 22px; height: 22px; }
+.tab-cta {
+  background: var(--yellow);
+  color: var(--border);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -26px;
+  border: 3px solid var(--border);
+  box-shadow: 0 4px 0 var(--border);
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: bold;
+}
+
+/* ========= PROFILE SCREEN ========= */
+.profile-banner {
+  background: var(--purple);
+  border: 3px solid var(--border);
+  border-radius: 24px;
+  padding: 24px 18px 18px;
+  margin: 8px 0 16px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 5px 0 var(--border);
+  overflow: hidden;
+  color: #fff;
+}
+.profile-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255, 212, 59, 0.4), transparent 50%),
+    radial-gradient(circle at 20% 90%, rgba(255, 122, 182, 0.3), transparent 40%);
+  pointer-events: none;
+}
+.profile-banner > * { position: relative; z-index: 1; }
+.avatar-frame {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: 3px solid var(--border);
+  margin: 0 auto 12px;
+  position: relative;
+  box-shadow: 0 4px 0 var(--border);
+}
+.avatar-frame::before {
+  content: 'NIV 47';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--border);
+  color: var(--yellow);
+  font-family: var(--display);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 2px solid var(--yellow);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+}
+.profile-pseudo {
+  font-family: var(--display);
+  font-size: 30px;
+  letter-spacing: 0.01em;
+  margin: 16px 0 4px;
+  color: #fff;
+  text-shadow: 0 2px 0 var(--purple-d);
+}
+.profile-handle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--yellow);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 13px;
+  padding: 4px 14px;
+  border-radius: 100px;
+  margin-top: 12px;
+  box-shadow: 0 2px 0 var(--border);
+}
+
+.duel-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.duel-cell {
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 3px 0 var(--border);
+}
+.duel-cell-num {
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.duel-cell-num.purple { color: var(--purple); }
+.duel-cell-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.qr-block {
+  background: #fff;
+  border: 3px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+  box-shadow: 0 4px 0 var(--border);
+}
+.qr-img {
+  width: 130px;
+  height: 130px;
+  background: #fff;
+  margin: 0 auto 10px;
+  border-radius: 14px;
+  padding: 8px;
+  border: 2px solid var(--border);
+}
+.qr-img svg { width: 100%; height: 100%; }
+.qr-cta {
+  font-family: var(--display);
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.qr-link {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--purple);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.qr-merch-btn {
+  display: inline-block;
+  background: var(--yellow);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 13px;
+  border: 2px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 100px;
+  text-decoration: none;
+  box-shadow: 0 3px 0 var(--border);
+}
+
+/* stats radar */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+.stat {
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 3px 0 var(--border);
+}
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.stat-name {
+  font-family: var(--display);
+  font-size: 11px;
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+.stat-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.stat-icon.body { background: var(--red); }
+.stat-icon.mind { background: var(--blue); }
+.stat-icon.social { background: var(--pink); }
+.stat-icon.altru { background: var(--green); }
+.stat-icon.prod { background: #FFA94D; }
+.stat-icon.create { background: var(--purple); color:#fff; }
+.stat-icon.detox { background: var(--yellow); }
+.stat-val {
+  font-family: var(--display);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-bar {
+  height: 6px;
+  background: var(--bg-3);
+  border-radius: 100px;
+  margin-top: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.stat-bar-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 100px;
+}
+.stat-7 { grid-column: span 2; }
+
+/* ========= LEADERBOARD SCREEN ========= */
+.lb-header {
+  text-align: center;
+  margin: 8px 0 12px;
+}
+.lb-header h1 {
+  font-family: var(--display);
+  font-size: 36px;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+}
+.lb-header h1 span { color: var(--purple); }
+.lb-header p {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.lb-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 16px;
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: 100px;
+  padding: 3px;
+  box-shadow: 0 3px 0 var(--border);
+}
+.lb-tab {
+  flex: 1;
+  text-align: center;
+  font-family: var(--display);
+  font-size: 11px;
+  padding: 6px 0;
+  border-radius: 100px;
+  color: var(--text-dim);
+}
+.lb-tab.active {
+  background: var(--purple);
+  color: #fff;
+}
+
+/* podium */
+.podium {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  align-items: end;
+  gap: 8px;
+  margin: 14px 0 20px;
+  height: 200px;
+}
+.podium-spot {
+  background: var(--bg-2);
+  border: 3px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: 0 4px 0 var(--border);
+  position: relative;
+}
+.podium-spot.gold { background: var(--yellow); height: 100%; }
+.podium-spot.silver { background: #E8E8E8; height: 85%; }
+.podium-spot.bronze { background: #F4B98A; height: 70%; }
+.podium-avatar {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  background: #fff;
+  margin: -34px auto 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 3px 0 var(--border);
+}
+.podium-name {
+  font-family: var(--display);
+  font-size: 13px;
+  line-height: 1;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.podium-xp {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+}
+.podium-medal {
+  position: absolute;
+  top: -16px; right: -8px;
+  background: #fff;
+  border: 2px solid var(--border);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display);
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: 0 2px 0 var(--border);
+}
+
+.lb-rewards {
+  background: var(--purple);
+  color: #fff;
+  border: 3px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 0 var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lb-rewards-icon {
+  font-size: 22px;
+}
+.lb-rewards-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.lb-rewards-text strong {
+  font-family: var(--display);
+  font-size: 14px;
+  display: block;
+  font-weight: normal;
+  margin-bottom: 2px;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 0 var(--border);
+}
+.lb-rank {
+  font-family: var(--display);
+  font-size: 16px;
+  color: var(--text-muted);
+  width: 24px;
+  text-align: center;
+}
+.lb-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.lb-info { flex: 1; min-width: 0; }
+.lb-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 1px;
+  color: var(--text);
+}
+.lb-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+.lb-xp {
+  font-family: var(--display);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.lb-you {
+  background: var(--yellow);
+  border-color: var(--border);
+}
+
+/* ========= DECISIONS PANEL ========= */
+.decisions {
+  margin-top: 80px;
+}
+.decisions h2 {
+  font-family: var(--display);
+  font-size: 48px;
+  letter-spacing: 0.01em;
+  margin-bottom: 12px;
+  text-shadow: 3px 3px 0 var(--yellow);
+}
+.decisions h2 .pop { color: var(--purple); }
+.decisions > p {
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  max-width: 580px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+.decision-card {
+  background: var(--bg-2);
+  border: 3px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 5px 0 var(--border);
+}
+.decision-card.highlight {
+  background: var(--yellow);
+}
+.decision-card.purple {
+  background: var(--purple);
+  color: #fff;
+}
+.decision-card.purple .dec-desc { color: rgba(255,255,255,0.8); }
+.decision-card.purple .dec-opt { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3); }
+.decision-card.purple .dec-opt.reco { background: var(--yellow); color: var(--text); border-color: var(--border); }
+.dec-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+  color: var(--purple);
+  font-weight: 700;
+}
+.decision-card.purple .dec-num { color: var(--yellow); }
+.dec-title {
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: 0.01em;
+  margin-bottom: 6px;
+}
+.dec-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.dec-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dec-opt {
+  font-family: var(--display);
+  font-size: 12px;
+  background: var(--bg-3);
+  border: 2px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 100px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 0 var(--border);
+}
+.dec-opt.reco {
+  background: var(--purple);
+  color: #fff;
+}
+.dec-opt.reco::after { content: ' ✓'; }
+
+.color-swatches {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 3px solid var(--border);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--border);
+  position: relative;
+}
+.swatch.active::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 16px;
+  color: var(--text);
+}
+.swatch.yellow { background: #FFD43B; }
+.swatch.yellow-warm { background: #F4B400; }
+.swatch.purple { background: #6750E8; }
+.swatch.coral { background: #FF7AB6; }
+.swatch.teal { background: #2DD4BF; }
+.swatch.navy { background: #1E40AF; }
+
+/* footer */
+.foot {
+  margin-top: 60px;
+  padding-top: 32px;
+  border-top: 2px dashed var(--border-soft);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+.foot strong { color: var(--purple); }
+
+/* responsive */
+@media (max-width: 880px) {
+  .phone { transform: scale(0.85); transform-origin: top center; margin-bottom: -120px; }
+  .intro h1 { text-shadow: 2px 2px 0 var(--yellow); }
+}
+
+/* avatar variants for showcase */
+.avatar-showcase {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.avatar-demo {
+  background: #fff;
+  border: 3px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 8px;
+  text-align: center;
+  box-shadow: 0 4px 0 var(--border);
+}
+.avatar-demo-img {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  border: 2px solid var(--border);
+  background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.avatar-demo-img img { width: 100%; height: 100%; }
+.avatar-demo-name {
+  font-family: var(--display);
+  font-size: 14px;
+  color: var(--text);
+}
+.avatar-demo-info {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- INTRO -->
+  <section class="intro">
+    <div class="intro-eyebrow">— Maquette V2 · jaune + violet · plus fun</div>
+    <h1>luavio<br>au <span class="pop">soleil</span>.</h1>
+    <p>Fond clair, jaune doux, violet vif pour les accents.
+    Typo "Lilita One" — esprit Clash Royale, Brawl Stars, mais plus moderne.
+    Bordures épaisses, ombres flat. Ressenti jeu mobile coloré pour tous, ados comme adultes.</p>
+  </section>
+
+  <!-- PHONES -->
+  <h3 class="section-title">— Écrans principaux</h3>
+
+  <div class="phones-grid">
+
+    <!-- HOME -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status">
+            <span>9:41</span>
+            <span class="status-right">●●● ◗ 92</span>
+          </div>
+          <div class="content">
+
+            <div class="top-bar">
+              <div class="top-greet">Salut <span>Maxou</span> 👋</div>
+              <div class="top-icons">
+                <div class="top-icon sparks">⚡ 240</div>
+                <div class="top-icon">🔔</div>
+              </div>
+            </div>
+
+            <div class="level-card">
+              <div class="level-top">
+                <div class="level-rank">⭐ OR II</div>
+                <div class="level-streak">🔥 23</div>
+              </div>
+              <div class="level-num">47</div>
+              <div class="level-label">Niveau · 1240 XP cette semaine</div>
+              <div class="xp-bar"><div class="xp-bar-fill"></div></div>
+              <div class="xp-text">
+                <span>Niveau 47</span>
+                <span><strong>3 200</strong> / 5 000 XP</span>
+              </div>
+            </div>
+
+            <div class="sunday-banner">
+              <div class="lightning">⚡</div>
+              <div class="sunday-text">
+                <div class="sunday-title">Course du Dimanche</div>
+                <div class="sunday-sub">XP ×2 · dans 3 jours</div>
+              </div>
+              <div class="sunday-chev">→</div>
+            </div>
+
+            <div class="section-h">
+              <h2>Aujourd'hui</h2>
+              <div class="pill">2 / 3</div>
+            </div>
+
+            <div class="task done">
+              <div class="task-icon body">💪</div>
+              <div class="task-info">
+                <div class="task-title">Séance de sport ≥ 20 min</div>
+                <div class="task-meta"><span>CORPS</span><span>·</span><span>Validé</span></div>
+              </div>
+              <div class="task-xp">+80</div>
+            </div>
+
+            <div class="task done">
+              <div class="task-icon altru">🌿</div>
+              <div class="task-info">
+                <div class="task-title">Ramasser un déchet</div>
+                <div class="task-meta"><span>ALTRUISME</span><span>·</span><span>Validé</span></div>
+              </div>
+              <div class="task-xp">+40</div>
+            </div>
+
+            <div class="task">
+              <div class="task-icon mind">📖</div>
+              <div class="task-info">
+                <div class="task-title">Lire 30 minutes</div>
+                <div class="task-meta"><span>ESPRIT</span><span>·</span><span>Facile</span></div>
+              </div>
+              <div class="task-xp">+60</div>
+            </div>
+
+            <div class="section-h">
+              <h2>Cette semaine</h2>
+              <div class="pill">3 / 5</div>
+            </div>
+
+            <div class="task">
+              <div class="task-icon detox">📵</div>
+              <div class="task-info">
+                <div class="task-title">&lt; 2h réseaux sociaux</div>
+                <div class="task-meta"><span>DÉTOX</span><span>·</span><span>4/7 jours</span></div>
+              </div>
+              <div class="task-xp">+400</div>
+            </div>
+
+            <div class="task">
+              <div class="task-icon body">🏃</div>
+              <div class="task-info">
+                <div class="task-title">5 séances de sport</div>
+                <div class="task-meta"><span>CORPS</span><span>·</span><span>3/5</span></div>
+              </div>
+              <div class="task-xp">+300</div>
+            </div>
+
+          </div>
+
+          <div class="tabbar">
+            <div class="tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Home
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V3l6 4 6-4v6"/><path d="M5 9h14l-2 11H7L5 9z"/></svg>
+              Rang
+            </div>
+            <div class="tab-cta">+</div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.4 8.4 0 0 1-1 4 8.5 8.5 0 0 1-7.6 4.5 8.4 8.4 0 0 1-4-1L3 21l2-5.4a8.5 8.5 0 0 1 16-4z"/></svg>
+              Social
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              Moi
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Home</div>
+    </div>
+
+    <!-- LEADERBOARD - mis en 2e pour valoriser -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status">
+            <span>9:41</span>
+            <span class="status-right">●●● ◗ 92</span>
+          </div>
+          <div class="content">
+            <div class="lb-header">
+              <h1>Le <span>classement</span></h1>
+              <p>— Saison · Mai 2026</p>
+            </div>
+
+            <div class="lb-tabs">
+              <div class="lb-tab">Monde</div>
+              <div class="lb-tab">France</div>
+              <div class="lb-tab active">La Seyne</div>
+              <div class="lb-tab">Amis</div>
+            </div>
+
+            <div class="lb-rewards">
+              <div class="lb-rewards-icon">🏆</div>
+              <div class="lb-rewards-text">
+                <strong>Top 10 dimanche → récompenses</strong>
+                Cosmétiques, ⚡ Sparks, pass gratuits
+              </div>
+            </div>
+
+            <div class="podium">
+              <div class="podium-spot silver">
+                <div class="podium-medal">2</div>
+                <div class="podium-avatar">🦸</div>
+                <div class="podium-name">thomas.b</div>
+                <div class="podium-xp">38 420</div>
+              </div>
+              <div class="podium-spot gold">
+                <div class="podium-medal">👑</div>
+                <div class="podium-avatar">🧝</div>
+                <div class="podium-name">elina</div>
+                <div class="podium-xp">42 180</div>
+              </div>
+              <div class="podium-spot bronze">
+                <div class="podium-medal">3</div>
+                <div class="podium-avatar">🧑‍🎤</div>
+                <div class="podium-name">lina.m</div>
+                <div class="podium-xp">31 050</div>
+              </div>
+            </div>
+
+            <div class="lb-row">
+              <div class="lb-rank">4</div>
+              <div class="lb-avatar">🧑</div>
+              <div class="lb-info">
+                <div class="lb-name">paul92</div>
+                <div class="lb-meta">Maître · 22 streak</div>
+              </div>
+              <div class="lb-xp">28 700</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">5</div>
+              <div class="lb-avatar">👩</div>
+              <div class="lb-info">
+                <div class="lb-name">sara.r</div>
+                <div class="lb-meta">Diamant · 19 streak</div>
+              </div>
+              <div class="lb-xp">24 100</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">6</div>
+              <div class="lb-avatar">🧔</div>
+              <div class="lb-info">
+                <div class="lb-name">karim.83</div>
+                <div class="lb-meta">Diamant</div>
+              </div>
+              <div class="lb-xp">22 880</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">7</div>
+              <div class="lb-avatar">🧑‍🦰</div>
+              <div class="lb-info">
+                <div class="lb-name">nina_v</div>
+                <div class="lb-meta">Diamant</div>
+              </div>
+              <div class="lb-xp">21 410</div>
+            </div>
+
+            <div class="lb-row lb-you">
+              <div class="lb-rank" style="color:var(--purple);">12</div>
+              <div class="lb-avatar" style="background:var(--purple); color:#fff;">🧑‍🦱</div>
+              <div class="lb-info">
+                <div class="lb-name">Toi · Maxou</div>
+                <div class="lb-meta">Or II · 23 streak</div>
+              </div>
+              <div class="lb-xp">15 240</div>
+            </div>
+
+          </div>
+          <div class="tabbar">
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Home
+            </div>
+            <div class="tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V3l6 4 6-4v6"/><path d="M5 9h14l-2 11H7L5 9z"/></svg>
+              Rang
+            </div>
+            <div class="tab-cta">+</div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.4 8.4 0 0 1-1 4 8.5 8.5 0 0 1-7.6 4.5 8.4 8.4 0 0 1-4-1L3 21l2-5.4a8.5 8.5 0 0 1 16-4z"/></svg>
+              Social
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              Moi
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Classement 🏆</div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status">
+            <span>9:41</span>
+            <span class="status-right">●●● ◗ 92</span>
+          </div>
+          <div class="content">
+            <div class="profile-banner">
+              <div class="avatar-frame"><div class="avatar-inner">🧑‍🦱</div></div>
+              <div class="profile-pseudo">Maxou</div>
+              <div class="profile-handle">@maxou · La Seyne 🇫🇷</div>
+              <div class="rank-badge">⭐ OR II · 1240 XP</div>
+            </div>
+
+            <div class="duel-card">
+              <div class="duel-cell">
+                <div class="duel-cell-num purple">23</div>
+                <div class="duel-cell-label">🔥 Streak</div>
+              </div>
+              <div class="duel-cell">
+                <div class="duel-cell-num">12</div>
+                <div class="duel-cell-label">⚔ Duels W</div>
+              </div>
+              <div class="duel-cell">
+                <div class="duel-cell-num">8</div>
+                <div class="duel-cell-label">🎖 Badges</div>
+              </div>
+            </div>
+
+            <div class="qr-block">
+              <div class="qr-cta">Scanne pour me suivre</div>
+              <div class="qr-img">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#fff"/>
+                  <g fill="#1A1A2E">
+                    <rect x="0" y="0" width="30" height="30"/>
+                    <rect x="5" y="5" width="20" height="20" fill="#fff"/>
+                    <rect x="10" y="10" width="10" height="10"/>
+                    <rect x="70" y="0" width="30" height="30"/>
+                    <rect x="75" y="5" width="20" height="20" fill="#fff"/>
+                    <rect x="80" y="10" width="10" height="10"/>
+                    <rect x="0" y="70" width="30" height="30"/>
+                    <rect x="5" y="75" width="20" height="20" fill="#fff"/>
+                    <rect x="10" y="80" width="10" height="10"/>
+                    <rect x="40" y="0" width="5" height="5"/>
+                    <rect x="50" y="0" width="5" height="5"/>
+                    <rect x="35" y="10" width="5" height="5"/>
+                    <rect x="45" y="15" width="5" height="5"/>
+                    <rect x="55" y="10" width="5" height="5"/>
+                    <rect x="60" y="20" width="5" height="5"/>
+                    <rect x="0" y="40" width="5" height="5"/>
+                    <rect x="10" y="40" width="5" height="5"/>
+                    <rect x="20" y="45" width="5" height="5"/>
+                    <rect x="30" y="40" width="5" height="5"/>
+                    <rect x="40" y="40" width="5" height="5"/>
+                    <rect x="50" y="50" width="5" height="5"/>
+                    <rect x="60" y="40" width="5" height="5"/>
+                    <rect x="70" y="45" width="5" height="5"/>
+                    <rect x="80" y="40" width="5" height="5"/>
+                    <rect x="90" y="50" width="5" height="5"/>
+                    <rect x="40" y="60" width="5" height="5"/>
+                    <rect x="55" y="65" width="5" height="5"/>
+                    <rect x="65" y="60" width="5" height="5"/>
+                    <rect x="75" y="70" width="5" height="5"/>
+                    <rect x="85" y="65" width="5" height="5"/>
+                    <rect x="95" y="60" width="5" height="5"/>
+                    <rect x="40" y="80" width="5" height="5"/>
+                    <rect x="50" y="80" width="5" height="5"/>
+                    <rect x="60" y="90" width="5" height="5"/>
+                    <rect x="70" y="80" width="5" height="5"/>
+                    <rect x="85" y="85" width="5" height="5"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="qr-link">luavio.app/u/maxou</div>
+              <a class="qr-merch-btn" href="#">👕 Mon merch</a>
+            </div>
+
+            <div class="section-h">
+              <h2>Mes stats</h2>
+              <div class="pill">7</div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">CORPS</span><div class="stat-icon body">💪</div></div>
+                <div class="stat-val">52</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:80%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">ESPRIT</span><div class="stat-icon mind">🧠</div></div>
+                <div class="stat-val">38</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:55%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">SOCIAL</span><div class="stat-icon social">❤️</div></div>
+                <div class="stat-val">44</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:65%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">ALTRUISME</span><div class="stat-icon altru">🤝</div></div>
+                <div class="stat-val">61</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:92%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">PROD.</span><div class="stat-icon prod">💼</div></div>
+                <div class="stat-val">35</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:48%"></div></div>
+              </div>
+              <div class="stat">
+                <div class="stat-top"><span class="stat-name">CRÉATION</span><div class="stat-icon create">🎨</div></div>
+                <div class="stat-val">29</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:40%"></div></div>
+              </div>
+              <div class="stat stat-7">
+                <div class="stat-top"><span class="stat-name">DÉTOX ÉCRAN</span><div class="stat-icon detox">📵</div></div>
+                <div class="stat-val">71</div>
+                <div class="stat-bar"><div class="stat-bar-fill" style="width:71%; background:var(--yellow-d);"></div></div>
+              </div>
+            </div>
+
+          </div>
+          <div class="tabbar">
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Home
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V3l6 4 6-4v6"/><path d="M5 9h14l-2 11H7L5 9z"/></svg>
+              Rang
+            </div>
+            <div class="tab-cta">+</div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.4 8.4 0 0 1-1 4 8.5 8.5 0 0 1-7.6 4.5 8.4 8.4 0 0 1-4-1L3 21l2-5.4a8.5 8.5 0 0 1 16-4z"/></svg>
+              Social
+            </div>
+            <div class="tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              Moi
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Profil</div>
+    </div>
+
+  </div>
+
+  <!-- AVATARS COMPARISON -->
+  <h3 class="section-title">— Quel style d'avatar ?</h3>
+  <div class="avatar-showcase">
+    <div class="avatar-demo">
+      <div class="avatar-demo-img">
+        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Maxou&backgroundColor=ffd43b" alt="Avataaars">
+      </div>
+      <div class="avatar-demo-name">Avataaars</div>
+      <div class="avatar-demo-info">Style cartoon, fun, large customisation. <strong>Recommandé.</strong></div>
+    </div>
+    <div class="avatar-demo">
+      <div class="avatar-demo-img">
+        <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Maxou" alt="Lorelei">
+      </div>
+      <div class="avatar-demo-name">Lorelei</div>
+      <div class="avatar-demo-info">Plus doux, illustré, élégant.</div>
+    </div>
+    <div class="avatar-demo">
+      <div class="avatar-demo-img">
+        <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Maxou" alt="Adventurer">
+      </div>
+      <div class="avatar-demo-name">Adventurer</div>
+      <div class="avatar-demo-info">Plus RPG, héroïque, style "aventure".</div>
+    </div>
+    <div class="avatar-demo">
+      <div class="avatar-demo-img">
+        <img src="https://api.dicebear.com/9.x/big-smile/svg?seed=Maxou" alt="Big Smile">
+      </div>
+      <div class="avatar-demo-name">Big Smile</div>
+      <div class="avatar-demo-info">Très Brawl Stars / Clash style. Énergique.</div>
+    </div>
+    <div class="avatar-demo">
+      <div class="avatar-demo-img">
+        <img src="https://api.dicebear.com/9.x/fun-emoji/svg?seed=Maxou" alt="Fun Emoji">
+      </div>
+      <div class="avatar-demo-name">Fun Emoji</div>
+      <div class="avatar-demo-info">Minimaliste, expressif, jeune.</div>
+    </div>
+    <div class="avatar-demo">
+      <div class="avatar-demo-img">
+        <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Maxou" alt="Notionists">
+      </div>
+      <div class="avatar-demo-name">Notionists</div>
+      <div class="avatar-demo-info">Style Notion, sobre, hipster.</div>
+    </div>
+  </div>
+
+  <!-- DECISIONS -->
+  <div class="decisions">
+    <h2>À <span class="pop">valider</span>.</h2>
+    <p>Regarde la nouvelle direction. Plus claire, plus fun, plus universelle.
+    Pour chaque carte : OK / changement / je sais pas. Réponds en bloc.</p>
+
+    <div class="decision-grid">
+
+      <div class="decision-card highlight">
+        <div class="dec-num">— 01 · CRITIQUE</div>
+        <div class="dec-title">Cette direction visuelle ?</div>
+        <div class="dec-desc">Fond crème jaune doux, accent violet, typo Lilita One arrondie style Brawl/Clash. Plus accessible et fun. Adapté aux enfants ET adultes.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Je valide</div>
+          <div class="dec-opt">Trop enfantin</div>
+          <div class="dec-opt">Trop coloré</div>
+          <div class="dec-opt">Pas assez fun</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 02</div>
+        <div class="dec-title">Nuance de jaune</div>
+        <div class="dec-desc">Tu voulais "moins flashy". J'ai choisi #FFD43B (jaune doux miel). Plus chaud que jaune fluo.</div>
+        <div class="color-swatches">
+          <div class="swatch yellow active" title="#FFD43B"></div>
+          <div class="swatch yellow-warm" title="#F4B400 (plus doré)"></div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 03</div>
+        <div class="dec-title">2e couleur</div>
+        <div class="dec-desc">Reco : violet vif (#6750E8). Contraste parfait sur jaune, hype Gen Z, Solo Leveling vibes.</div>
+        <div class="color-swatches">
+          <div class="swatch purple active" title="Violet #6750E8 (reco)"></div>
+          <div class="swatch coral" title="Rose corail"></div>
+          <div class="swatch teal" title="Teal #2DD4BF"></div>
+          <div class="swatch navy" title="Bleu marine"></div>
+        </div>
+      </div>
+
+      <div class="decision-card purple">
+        <div class="dec-num">— 04 · ATTENTION</div>
+        <div class="dec-title">Nom de la monnaie</div>
+        <div class="dec-desc">⚠ "Sparx" est déjà pris : jeu santé mentale officiel en Nouvelle-Zélande (gouvernement) + wallet crypto + groupe musique. Risque marque réel.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Sparks ⚡ (avec K)</div>
+          <div class="dec-opt">Volts ⚡</div>
+          <div class="dec-opt">Étincelles ✨</div>
+          <div class="dec-opt">Bolts</div>
+          <div class="dec-opt">Lumos</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 05</div>
+        <div class="dec-title">Avatar</div>
+        <div class="dec-desc">Vu en bas. Reco : <strong>Avataaars</strong> (le plus customisable, large palette). DiceBear, gratuit, illimité.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Avataaars</div>
+          <div class="dec-opt">Big Smile</div>
+          <div class="dec-opt">Adventurer</div>
+          <div class="dec-opt">Lorelei</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 06</div>
+        <div class="dec-title">Catégories XP</div>
+        <div class="dec-desc">Tu as demandé 7. Confirmation : Corps, Esprit, Social, Altruisme, Productivité, Création, Détox écran.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">7 stats (avec Détox)</div>
+          <div class="dec-opt">Modifier</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 07</div>
+        <div class="dec-title">Système de rangs visuel</div>
+        <div class="dec-desc">Style Solo Leveling / League : E → D → C → B → A → S → SS → SSS. Ou plus classique : Bronze → Or → Diamant → Légende.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">Solo Leveling (E→SSS)</div>
+          <div class="dec-opt">Classique (Bronze→Légende)</div>
+          <div class="dec-opt">Hybride</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 08</div>
+        <div class="dec-title">Pass mensuel — nom</div>
+        <div class="dec-desc">"luavio+" reste validé ? À noter pour l'appli stores : "luavio Plus" est plus searchable.</div>
+        <div class="dec-options">
+          <div class="dec-opt reco">luavio+ (affichage)</div>
+          <div class="dec-opt">luavio Plus</div>
+          <div class="dec-opt">luavio Pro</div>
+        </div>
+      </div>
+
+      <div class="decision-card">
+        <div class="dec-num">— 09 · OK ACTÉS</div>
+        <div class="dec-title">Validés sans débat</div>
+        <div class="dec-desc">Vérif IA = Gemini Flash gratuit ✓ &nbsp; KYC = Yoti ✓ &nbsp; Langue = FR d'abord, EN ensuite ✓ &nbsp; Photos = Supabase + delete 30j ✓ &nbsp; Domaine = déjà à toi ✓ &nbsp; iPhone test ✓ &nbsp; Légal = DIY V1 ✓</div>
+      </div>
+
+      <div class="decision-card purple">
+        <div class="dec-num">— 10 · BESOIN EXPLICATION</div>
+        <div class="dec-title">Comptes développeur Apple/Google</div>
+        <div class="dec-desc">Tu as dit ne pas comprendre. Je détaille dans le fichier <strong>21_comptes_dev_expliques.md</strong>. C'est simple, indispensable, 110 € one-shot.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="foot">
+    <strong>luavio</strong> · maquette v0.2 · direction "Sunshine" · à itérer
+  </div>
+
+</div>
+
+</body>
+</html>
