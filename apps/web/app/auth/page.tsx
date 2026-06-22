@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import Logo from "@/components/Logo";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -47,10 +49,16 @@ export default function AuthPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
-      <form
+      <motion.form
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35 }}
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-surface border-2 border-outline rounded-sticker p-6 shadow-[0_4px_0_0_#1A1A2E]"
+        className="w-full max-w-sm bg-surface border-[3px] border-outline rounded-sticker p-7 shadow-[0_5px_0_0_#1A1A2E]"
       >
+        <div className="text-center mb-6">
+          <Logo size={28} />
+        </div>
         <h1 className="font-heading text-2xl text-center mb-6">
           {mode === "signup" ? "Créer un compte" : "Connexion"}
         </h1>
@@ -61,7 +69,7 @@ export default function AuthPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full border-2 border-outline rounded-sticker px-4 py-2 mb-3"
+          className="w-full border-2 border-outline rounded-sticker px-4 py-2.5 mb-3 outline-none focus:border-secondary transition"
         />
         <input
           type="password"
@@ -70,7 +78,7 @@ export default function AuthPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full border-2 border-outline rounded-sticker px-4 py-2 mb-4"
+          className="w-full border-2 border-outline rounded-sticker px-4 py-2.5 mb-4 outline-none focus:border-secondary transition"
         />
 
         <button
@@ -90,7 +98,7 @@ export default function AuthPage() {
         >
           {mode === "signup" ? "Déjà un compte ? Se connecter" : "Pas de compte ? S'inscrire"}
         </button>
-      </form>
+      </motion.form>
     </main>
   );
 }

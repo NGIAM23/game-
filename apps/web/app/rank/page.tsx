@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import {
   levelFromTotalXp,
@@ -12,7 +13,7 @@ import {
   TIER_COLORS,
   TIER_ABBR,
 } from "@luavio/shared";
-import BottomNav from "@/components/BottomNav";
+import Shell from "@/components/Shell";
 
 interface Profile {
   total_xp: number;
@@ -48,8 +49,18 @@ export default function RankPage() {
     load();
   }, [router]);
 
-  if (loading) return <main className="min-h-screen flex items-center justify-center">Chargement...</main>;
-  if (error || !profile) return <main className="min-h-screen flex items-center justify-center">{error}</main>;
+  if (loading)
+    return (
+      <Shell>
+        <p className="text-center font-heading">Chargement...</p>
+      </Shell>
+    );
+  if (error || !profile)
+    return (
+      <Shell>
+        <p className="text-center">{error}</p>
+      </Shell>
+    );
 
   const { level, xpIntoLevel, xpForNextLevel } = levelFromTotalXp(profile.total_xp);
   const rank = rankFromLevel(level);
@@ -57,46 +68,68 @@ export default function RankPage() {
   const pct = Math.min(100, Math.round((xpIntoLevel / xpForNextLevel) * 100));
 
   return (
-    <main className="min-h-screen px-6 pb-28">
-      <div className="max-w-xl mx-auto pt-8">
-        <h1 className="font-heading text-3xl text-center mb-1">
-          Mon <span className="text-secondary">rang</span>
-        </h1>
-        <p className="font-mono text-xs uppercase tracking-widest opacity-50 text-center mb-6">
-          11 paliers × 4 niveaux
-        </p>
+    <Shell wide>
+      <h1 className="font-heading text-3xl text-center lg:text-left mb-1">
+        Mon <span className="text-secondary">rang</span>
+      </h1>
+      <p className="font-mono text-xs uppercase tracking-widest opacity-50 text-center lg:text-left mb-6">
+        11 paliers × 4 niveaux
+      </p>
 
+      <div className="grid lg:grid-cols-[1fr_1.4fr] gap-6 items-start">
         {/* current rank banner */}
-        <div className="relative overflow-hidden bg-secondary border-[3px] border-outline rounded-sticker p-5 mb-6 shadow-[0_5px_0_0_#1A1A2E] text-white text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="relative overflow-hidden bg-secondary border-[3px] border-outline rounded-sticker p-6 lg:p-8 text-center text-white shadow-[0_5px_0_0_#1A1A2E] lg:sticky lg:top-12"
+        >
           <div
-            className="w-20 h-20 rounded-full mx-auto mb-3 border-[3px] border-outline flex items-center justify-center font-heading text-2xl text-outline shadow-[0_4px_0_0_#1A1A2E]"
-            style={{ backgroundColor: "#FFD43B" }}
-          >
-            {TIER_ABBR[currentTier.name]}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(circle at 50% 100%, rgba(255,212,59,0.4), transparent 60%)" }}
+          />
+          <div className="relative">
+            <motion.div
+              initial={{ rotate: -8, scale: 0.8 }}
+              animate={{ rotate: 0, scale: 1 }}
+              transition={{ duration: 0.5, type: "spring" }}
+              className="w-20 h-20 rounded-full mx-auto mb-3 border-[3px] border-outline flex items-center justify-center font-heading text-2xl text-outline shadow-[0_4px_0_0_#1A1A2E]"
+              style={{ backgroundColor: "#FFD43B" }}
+            >
+              {TIER_ABBR[currentTier.name]}
+            </motion.div>
+            <div className="font-heading text-2xl mb-1">{rank}</div>
+            <div className="font-mono text-xs uppercase tracking-widest opacity-85 mb-3">
+              Niveau {level} · {profile.total_xp} XP
+            </div>
+            <div className="h-3 bg-black/30 border-2 border-outline rounded-full overflow-hidden mb-2">
+              <motion.div
+                className="h-full bg-primary border-r-2 border-outline"
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+              />
+            </div>
+            <div className="font-mono text-[11px] flex justify-between opacity-90">
+              <span>{rank}</span>
+              <span>
+                <strong className="text-primary">{xpIntoLevel}</strong> / {xpForNextLevel} XP
+              </span>
+            </div>
           </div>
-          <div className="font-heading text-2xl mb-1">{rank}</div>
-          <div className="font-mono text-xs uppercase tracking-widest opacity-85 mb-3">
-            Niveau {level} · {profile.total_xp} XP
-          </div>
-          <div className="h-3 bg-black/30 border-2 border-outline rounded-full overflow-hidden mb-2">
-            <div className="h-full bg-primary border-r-2 border-outline" style={{ width: `${pct}%` }} />
-          </div>
-          <div className="font-mono text-[11px] flex justify-between opacity-90">
-            <span>{rank}</span>
-            <span>
-              <strong className="text-primary">{xpIntoLevel}</strong> / {xpForNextLevel} XP
-            </span>
-          </div>
-        </div>
+        </motion.div>
 
         <div className="flex flex-col gap-1.5">
-          {RANK_TIERS.map((tier) => {
+          {RANK_TIERS.map((tier, i) => {
             const isCurrent = tier.name === currentTier.name;
             const isPast = level > tier.maxLevel;
             const sub = isCurrent ? subTierForLevel(level, tier) : null;
             return (
-              <div
+              <motion.div
                 key={tier.name}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.03 }}
                 className={`flex items-center gap-3 p-2.5 bg-surface border-2 border-outline rounded-sticker ${
                   isCurrent ? "shadow-[0_4px_0_0_#1A1A2E] border-[3px]" : "shadow-[0_2px_0_0_#1A1A2E]"
                 } ${!isCurrent && !isPast ? "opacity-40" : ""}`}
@@ -121,13 +154,11 @@ export default function RankPage() {
                 >
                   {isCurrent ? `EN COURS · ${sub}` : isPast ? "✓ Acquis" : "À venir"}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       </div>
-
-      <BottomNav />
-    </main>
+    </Shell>
   );
 }

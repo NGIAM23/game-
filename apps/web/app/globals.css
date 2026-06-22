@@ -5,4 +5,19 @@
 body {
   background-color: #fff8e7;
   color: #1a1a2e;
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(103, 80, 232, 0.07) 0%, transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(255, 212, 59, 0.2) 0%, transparent 35%);
+  background-attachment: fixed;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #e8dcb4;
+  border-radius: 100px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }

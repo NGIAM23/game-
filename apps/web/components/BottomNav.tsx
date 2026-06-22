@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 const TABS = [
   { href: "/dashboard", label: "Accueil", icon: "🏠" },
+  { href: "/tasks", label: "Tâches", icon: "🎯" },
   { href: "/rank", label: "Rang", icon: "🏅" },
   { href: "/leaderboard", label: "Classement", icon: "🏆" },
 ];
@@ -20,7 +21,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t-[3px] border-outline z-10">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface border-t-[3px] border-outline z-10">
       <div className="max-w-xl mx-auto flex items-center justify-around py-2">
         {TABS.map((tab) => {
           const active = pathname === tab.href;
