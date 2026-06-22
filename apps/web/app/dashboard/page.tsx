@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { levelFromTotalXp, rankFromLevel, CATEGORIES, categoryColors } from "@luavio/shared";
+import { levelFromTotalXp, rankFromLevel, CATEGORIES, categoryColors, type CategoryId } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import SundayBanner from "@/components/SundayBanner";
@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [doneToday, setDoneToday] = useState(0);
   const [totalToday, setTotalToday] = useState(0);
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +60,17 @@ export default function Dashboard() {
       const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true });
       setDoneToday(completions?.length ?? 0);
       setTotalToday(Math.min(3, count ?? 3));
+
+      const { data: allCompletions } = await supabase
+        .from("task_completions")
+        .select("tasks(category)");
+      const counts: Record<string, number> = {};
+      for (const row of (allCompletions ?? []) as unknown as { tasks: { category: string } | { category: string }[] | null }[]) {
+        const tasksField = row.tasks;
+        const cat = Array.isArray(tasksField) ? tasksField[0]?.category : tasksField?.category;
+        if (cat) counts[cat] = (counts[cat] ?? 0) + 1;
+      }
+      setCategoryCounts(counts);
 
       setLoading(false);
     }
@@ -184,26 +196,47 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mt-8 mb-3">7 catégories XP</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-        {CATEGORIES.map((cat, i) => (
-          <motion.div
-            key={cat.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.03 * i }}
-            className="flex items-center gap-2.5 bg-surface border-2 border-outline rounded-sticker p-3 shadow-[0_2px_0_0_#1A1A2E]"
-          >
-            <span
-              className="w-9 h-9 rounded-lg border-2 border-outline flex items-center justify-center text-lg flex-shrink-0"
-              style={{ backgroundColor: categoryColors[cat.id] }}
-            >
-              {cat.icon}
-            </span>
-            <span className="font-body font-semibold text-xs">{cat.label}</span>
-          </motion.div>
-        ))}
-      </div>
+      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mt-8 mb-3">Progression par catégorie</h2>
+      {(() => {
+        const totalCompletions = Object.values(categoryCounts).reduce((sum, n) => sum + n, 0);
+        return (
+          <div className="grid sm:grid-cols-2 gap-2.5">
+            {CATEGORIES.map((cat, i) => {
+              const count = categoryCounts[cat.id] ?? 0;
+              const pct = totalCompletions > 0 ? Math.round((count / totalCompletions) * 100) : 0;
+              return (
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.03 * i }}
+                  className="bg-surface border-2 border-outline rounded-sticker p-3 shadow-[0_2px_0_0_#1A1A2E]"
+                >
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span
+                      className="w-9 h-9 rounded-lg border-2 border-outline flex items-center justify-center text-lg flex-shrink-0"
+                      style={{ backgroundColor: categoryColors[cat.id as CategoryId] }}
+                    >
+                      {cat.icon}
+                    </span>
+                    <span className="font-body font-semibold text-xs flex-1">{cat.label}</span>
+                    <span className="font-heading text-xs">{pct}%</span>
+                  </div>
+                  <div className="h-2.5 bg-background border-2 border-outline rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-secondary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 + 0.03 * i }}
+                    />
+                  </div>
+                  <span className="font-mono text-[10px] opacity-50">{count} tâche{count > 1 ? "s" : ""} complétée{count > 1 ? "s" : ""}</span>
+                </motion.div>
+              );
+            })}
+          </div>
+        );
+      })()}
     </Shell>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
 
 const TABS = [
   { href: "/dashboard", label: "Accueil", icon: "🏠" },
@@ -15,6 +17,11 @@ const TABS = [
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [soundOn, setSoundOn] = useState(true);
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+  }, []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -38,6 +45,18 @@ export default function BottomNav() {
             </Link>
           );
         })}
+        <button
+          onClick={() => {
+            const next = !soundOn;
+            setSoundOn(next);
+            setSoundEnabled(next);
+            if (next) playClick();
+          }}
+          className="flex flex-col items-center gap-0.5 font-heading text-[10px] uppercase text-outline opacity-50"
+        >
+          <span className="text-lg">{soundOn ? "🔊" : "🔇"}</span>
+          Son
+        </button>
         <button
           onClick={handleLogout}
           className="flex flex-col items-center gap-0.5 font-heading text-[10px] uppercase text-outline opacity-50"

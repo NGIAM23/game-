@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { CATEGORIES, categoryColors, isSunday, type CategoryId } from "@luavio/shared";
+import { CATEGORIES, categoryColors, isSunday, levelFromTotalXp, type CategoryId } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import SundayBanner from "@/components/SundayBanner";
+import { playTaskComplete, playLevelUp } from "@/lib/sound";
 
 type Location = "home" | "outside" | "any";
 
@@ -62,6 +63,7 @@ export default function TasksPage() {
   const [pending, setPending] = useState<string | null>(null);
   const [xpToday, setXpToday] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [totalXp, setTotalXp] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -74,6 +76,13 @@ export default function TasksPage() {
       const { data: allTasks, error: tasksError } = await supabase
         .from("tasks")
         .select("id, category, label, base_xp, location");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("total_xp")
+        .eq("id", session.session.user.id)
+        .single();
+      setTotalXp(profile?.total_xp ?? 0);
 
       const { data: completions, error: completionsError } = await supabase
         .from("task_completions")
@@ -102,6 +111,12 @@ export default function TasksPage() {
     if (!rpcError && typeof xpAwarded === "number") {
       setDoneIds((prev) => new Set(prev).add(taskId));
       setXpToday((prev) => prev + xpAwarded);
+
+      const newTotalXp = totalXp + xpAwarded;
+      const leveledUp = levelFromTotalXp(totalXp).level !== levelFromTotalXp(newTotalXp).level;
+      setTotalXp(newTotalXp);
+      if (leveledUp) playLevelUp();
+      else playTaskComplete();
     }
   }
 

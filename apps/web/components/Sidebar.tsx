@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
 import Logo from "./Logo";
 import Avatar from "./Avatar";
 
@@ -26,6 +27,11 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<MiniProfile | null>(null);
+  const [soundOn, setSoundOn] = useState(true);
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -94,6 +100,19 @@ export default function Sidebar() {
           </Link>
         )}
       </nav>
+
+      <button
+        onClick={() => {
+          const next = !soundOn;
+          setSoundOn(next);
+          setSoundEnabled(next);
+          if (next) playClick();
+        }}
+        className="flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 border-transparent opacity-50 hover:opacity-100 hover:bg-background transition"
+      >
+        <span className="text-lg">{soundOn ? "🔊" : "🔇"}</span>
+        {soundOn ? "Son activé" : "Son coupé"}
+      </button>
 
       <button
         onClick={handleLogout}
