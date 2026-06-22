@@ -12,12 +12,14 @@ const TABS = [
   { href: "/tasks", label: "Tâches", icon: "🎯" },
   { href: "/rank", label: "Mon rang", icon: "🏅" },
   { href: "/leaderboard", label: "Classement", icon: "🏆" },
+  { href: "/shop", label: "luavio+", icon: "✨" },
 ];
 
 interface MiniProfile {
   pseudo: string | null;
   avatar_seed: string | null;
   sparks: number;
+  is_admin?: boolean;
 }
 
 export default function Sidebar() {
@@ -31,7 +33,7 @@ export default function Sidebar() {
       if (!session.session) return;
       const { data } = await supabase
         .from("profiles")
-        .select("pseudo, avatar_seed, sparks")
+        .select("pseudo, avatar_seed, sparks, is_admin")
         .eq("id", session.session.user.id)
         .single();
       if (data) setProfile(data);
@@ -78,6 +80,19 @@ export default function Sidebar() {
             </Link>
           );
         })}
+        {profile?.is_admin && (
+          <Link
+            href="/admin"
+            className={`flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 transition ${
+              pathname === "/admin"
+                ? "bg-primary border-outline shadow-[0_3px_0_0_#1A1A2E] translate-y-0"
+                : "border-transparent opacity-60 hover:opacity-100 hover:bg-background"
+            }`}
+          >
+            <span className="text-lg">📊</span>
+            Stats (admin)
+          </Link>
+        )}
       </nav>
 
       <button

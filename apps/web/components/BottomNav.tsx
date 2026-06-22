@@ -9,6 +9,7 @@ const TABS = [
   { href: "/tasks", label: "Tâches", icon: "🎯" },
   { href: "/rank", label: "Rang", icon: "🏅" },
   { href: "/leaderboard", label: "Classement", icon: "🏆" },
+  { href: "/shop", label: "luavio+", icon: "✨" },
 ];
 
 export default function BottomNav() {
