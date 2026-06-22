@@ -90,14 +90,22 @@ function ShopContent() {
   async function startCheckout(kind: "plus_subscription" | "sparks_pack", packId?: string) {
     setBusy(packId ?? kind);
     const { data: session } = await supabase.auth.getSession();
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind, packId, accessToken: session.session?.access_token }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, packId, accessToken: session.session?.access_token }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setNotice(data.error ?? "Erreur lors du paiement, réessaie.");
+    } catch {
+      setNotice("Erreur réseau, réessaie.");
+    }
     setBusy(null);
-    if (data.url) window.location.href = data.url;
   }
 
   async function purchaseCosmetic(id: string) {
