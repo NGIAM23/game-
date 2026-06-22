@@ -9,6 +9,7 @@ interface Profile {
   id: string;
   pseudo: string | null;
   total_xp: number;
+  current_streak: number;
 }
 
 export default function Dashboard() {
@@ -26,7 +27,7 @@ export default function Dashboard() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, pseudo, total_xp")
+        .select("id, pseudo, total_xp, current_streak")
         .eq("id", session.session.user.id)
         .single();
 
@@ -65,6 +66,11 @@ export default function Dashboard() {
       <p className="text-sm opacity-60">
         {xpIntoLevel} / {xpForNextLevel} XP
       </p>
+      {profile.current_streak > 0 && (
+        <p className="text-sm" style={{ color: colors.primary, textShadow: "0 0 0 1px #1A1A2E" }}>
+          🔥 {profile.current_streak} jour{profile.current_streak > 1 ? "s" : ""} de suite
+        </p>
+      )}
 
       <button onClick={() => router.push("/tasks")} className="text-sm underline mt-2" style={{ color: colors.secondary }}>
         Tâches du jour
