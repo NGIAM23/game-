@@ -12,6 +12,7 @@ export default function RootLayout() {
     >
       <Stack.Screen name="index" options={{ title: "luavio — Tâches du jour" }} />
       <Stack.Screen name="profile" options={{ title: "Profil" }} />
+      <Stack.Screen name="auth" options={{ title: "Connexion", headerShown: false }} />
     </Stack>
   );
 }

@@ -1,33 +1,89 @@
-import { useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { View, Text, Pressable, FlatList, StyleSheet } from "react-native";
+import { router, useFocusEffect } from "expo-router";
 import { Link } from "expo-router";
-import { TASK_POOL, xpForTask, colors, categoryColors, CATEGORIES } from "@luavio/shared";
+import { colors, categoryColors, CATEGORIES, type CategoryId } from "@luavio/shared";
+import { supabase } from "../lib/supabase";
 
-// Mock V1 : 3 tâches quotidiennes tirées du pool, pas de backend pour l'instant.
-const DAILY_TASKS = TASK_POOL.slice(0, 3);
+interface TaskRow {
+  id: string;
+  category: CategoryId;
+  label: string;
+  base_xp: number;
+}
 
 export default function DailyTasks() {
-  const [done, setDone] = useState<Record<string, boolean>>({});
+  const [tasks, setTasks] = useState<TaskRow[]>([]);
+  const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
+  const [xpToday, setXpToday] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState<string | null>(null);
 
-  const totalXpToday = useMemo(
-    () => DAILY_TASKS.filter((t) => done[t.id]).reduce((sum, t) => sum + xpForTask(t), 0),
-    [done]
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+
+      async function load() {
+        const { data: session } = await supabase.auth.getSession();
+        if (!session.session) {
+          router.replace("/auth");
+          return;
+        }
+
+        const { data: allTasks } = await supabase.from("tasks").select("id, category, label, base_xp").limit(3);
+        const { data: completions } = await supabase
+          .from("task_completions")
+          .select("task_id, xp_awarded")
+          .eq("completed_on", new Date().toISOString().slice(0, 10));
+
+        if (!active) return;
+        setTasks(allTasks ?? []);
+        setDoneIds(new Set((completions ?? []).map((c) => c.task_id)));
+        setXpToday((completions ?? []).reduce((sum, c) => sum + c.xp_awarded, 0));
+        setLoading(false);
+      }
+      load();
+
+      return () => {
+        active = false;
+      };
+    }, [])
   );
+
+  async function completeTask(taskId: string) {
+    setPending(taskId);
+    const { data: xpAwarded, error } = await supabase.rpc("complete_task", { p_task_id: taskId });
+    setPending(null);
+    if (!error && typeof xpAwarded === "number") {
+      setDoneIds((prev) => new Set(prev).add(taskId));
+      setXpToday((prev) => prev + xpAwarded);
+    }
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.xpToday}>+{totalXpToday} XP aujourd'hui</Text>
+      <Text style={styles.xpToday}>+{xpToday} XP aujourd'hui</Text>
 
       <FlatList
-        data={DAILY_TASKS}
+        data={tasks}
         keyExtractor={(t) => t.id}
         contentContainerStyle={{ gap: 12 }}
         renderItem={({ item }) => {
           const category = CATEGORIES.find((c) => c.id === item.category)!;
-          const isDone = !!done[item.id];
+          const isDone = doneIds.has(item.id);
+          const xp = item.category === "detoxEcran" ? item.base_xp * 3 : item.base_xp;
           return (
             <Pressable
-              onPress={() => setDone((d) => ({ ...d, [item.id]: !d[item.id] }))}
+              onPress={() => completeTask(item.id)}
+              disabled={isDone || pending === item.id}
               style={[
                 styles.card,
                 { borderColor: categoryColors[item.category], opacity: isDone ? 0.6 : 1 },
@@ -36,7 +92,7 @@ export default function DailyTasks() {
               <Text style={styles.cardIcon}>{category.icon}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardLabel}>{item.label}</Text>
-                <Text style={styles.cardXp}>+{xpForTask(item)} XP</Text>
+                <Text style={styles.cardXp}>+{xp} XP</Text>
               </View>
               <Text style={styles.check}>{isDone ? "✅" : "⬜"}</Text>
             </Pressable>
@@ -55,7 +111,7 @@ export default function DailyTasks() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, gap: 16 },
-  xpToday: { fontFamily: undefined, fontSize: 20, fontWeight: "700", color: colors.secondary },
+  xpToday: { fontSize: 20, fontWeight: "700", color: colors.secondary },
   card: {
     flexDirection: "row",
     alignItems: "center",
