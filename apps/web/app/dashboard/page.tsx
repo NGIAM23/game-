@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { levelFromTotalXp, rankFromLevel, colors } from "@luavio/shared";
-import Nav from "@/components/Nav";
+import { levelFromTotalXp, rankFromLevel } from "@luavio/shared";
+import BottomNav from "@/components/BottomNav";
 
 interface Profile {
   id: string;
@@ -55,27 +55,65 @@ export default function Dashboard() {
 
   const { level, xpIntoLevel, xpForNextLevel } = levelFromTotalXp(profile.total_xp);
   const rank = rankFromLevel(level);
+  const pct = Math.min(100, Math.round((xpIntoLevel / xpForNextLevel) * 100));
 
   return (
-    <main className="min-h-screen px-6">
-      <Nav />
-      <div className="flex flex-col items-center justify-center gap-4 mt-8">
-        <p className="font-body opacity-60">@{profile.pseudo}</p>
-        <h1 className="font-heading text-3xl" style={{ color: colors.outline }}>
-          Niveau {level}
-        </h1>
-        <p className="font-heading text-xl" style={{ color: colors.secondary }}>
-          {rank}
+    <main className="min-h-screen px-6 pb-28">
+      <div className="max-w-xl mx-auto pt-8">
+        <div className="font-heading text-2xl mb-1">
+          Salut, <span className="text-secondary">{profile.pseudo}</span> 👋
+        </div>
+        <p className="font-mono text-xs uppercase tracking-widest opacity-50 mb-6">
+          Jour {profile.current_streak} · Streak en cours
         </p>
-        <p className="text-sm opacity-60">
-          {xpIntoLevel} / {xpForNextLevel} XP
-        </p>
-        {profile.current_streak > 0 && (
-          <p className="text-sm" style={{ color: colors.primary, textShadow: "0 0 0 1px #1A1A2E" }}>
-            🔥 {profile.current_streak} jour{profile.current_streak > 1 ? "s" : ""} de suite
-          </p>
-        )}
+
+        {/* Level card */}
+        <div className="relative overflow-hidden bg-secondary border-[3px] border-outline rounded-sticker p-5 mb-5 shadow-[0_5px_0_0_#1A1A2E] text-white">
+          <div className="flex items-start justify-between mb-3">
+            <span className="font-heading text-xs bg-primary text-outline border-2 border-outline rounded-full px-3 py-1 shadow-[0_2px_0_0_#1A1A2E]">
+              ⭐ {rank}
+            </span>
+            {profile.current_streak > 0 && (
+              <span className="font-heading text-sm bg-black/25 border-2 border-outline rounded-full px-3 py-1 flex items-center gap-1">
+                🔥 {profile.current_streak}
+              </span>
+            )}
+          </div>
+          <div className="font-heading leading-none mb-1" style={{ fontSize: 72 }}>
+            {level}
+          </div>
+          <div className="text-xs uppercase tracking-widest opacity-85 font-semibold mb-3">Niveau</div>
+          <div className="h-3.5 bg-black/35 border-2 border-outline rounded-full overflow-hidden mb-2">
+            <div
+              className="h-full bg-primary border-r-2 border-outline"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="font-mono text-xs flex justify-between opacity-90">
+            <span>{rank}</span>
+            <span>
+              <strong className="text-primary">{xpIntoLevel}</strong> / {xpForNextLevel} XP
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => router.push("/tasks")}
+            className="font-heading bg-primary border-2 border-outline rounded-sticker py-4 shadow-[0_4px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+          >
+            🎯 Tâches du jour
+          </button>
+          <button
+            onClick={() => router.push("/rank")}
+            className="font-heading bg-surface border-2 border-outline rounded-sticker py-4 shadow-[0_4px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+          >
+            🏅 Mon rang
+          </button>
+        </div>
       </div>
+
+      <BottomNav />
     </main>
   );
 }

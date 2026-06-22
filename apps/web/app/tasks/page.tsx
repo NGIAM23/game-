@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { CATEGORIES, type CategoryId } from "@luavio/shared";
-import Nav from "@/components/Nav";
+import { CATEGORIES, categoryColors, type CategoryId } from "@luavio/shared";
+import BottomNav from "@/components/BottomNav";
 
 interface TaskRow {
   id: string;
@@ -71,42 +71,66 @@ export default function TasksPage() {
   if (loading) return <main className="min-h-screen flex items-center justify-center">Chargement...</main>;
 
   return (
-    <main className="min-h-screen px-6">
-      <Nav />
-      <div className="max-w-xl mx-auto py-8">
-        <h1 className="font-heading text-3xl text-center mb-2 text-secondary">+{xpToday} XP aujourd'hui</h1>
-        <p className="text-center text-sm opacity-60 mb-8">Tâches du jour</p>
+    <main className="min-h-screen px-6 pb-28">
+      <div className="max-w-xl mx-auto pt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-heading text-2xl">Aujourd'hui</h2>
+          <span className="font-heading text-xs bg-surface border-2 border-outline rounded-full px-3 py-1 shadow-[0_2px_0_0_#1A1A2E]">
+            {doneIds.size} / {tasks.length}
+          </span>
+        </div>
+        <p className="font-heading text-xl text-secondary mb-6">+{xpToday} XP aujourd'hui</p>
 
         {error ? (
           <p className="text-center">{error}</p>
         ) : tasks.length === 0 ? (
           <p className="text-center opacity-60">Aucune tâche disponible pour le moment.</p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {tasks.map((task) => {
               const category = CATEGORIES.find((c) => c.id === task.category)!;
               const isDone = doneIds.has(task.id);
+              const xp = task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp;
               return (
                 <button
                   key={task.id}
                   disabled={isDone || pending === task.id}
                   onClick={() => completeTask(task.id)}
-                  className="flex items-center gap-3 bg-surface border-2 border-outline rounded-sticker p-4 text-left disabled:opacity-50"
+                  className={`flex items-center gap-3 border-2 border-outline rounded-sticker p-3.5 text-left transition shadow-[0_3px_0_0_#1A1A2E] active:translate-y-[3px] active:shadow-none ${
+                    isDone ? "opacity-70" : ""
+                  }`}
+                  style={{ backgroundColor: isDone ? "#F0EAD2" : "#FFFFFF" }}
                 >
-                  <span className="text-2xl">{category.icon}</span>
+                  <span
+                    className="w-11 h-11 rounded-xl border-2 border-outline flex items-center justify-center text-xl flex-shrink-0"
+                    style={{ backgroundColor: categoryColors[task.category] }}
+                  >
+                    {category.icon}
+                  </span>
                   <span className="flex-1">
-                    <span className="block font-body font-semibold">{task.label}</span>
-                    <span className="block text-xs opacity-60">
-                      +{task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp} XP
+                    <span
+                      className={`block font-body font-semibold text-sm ${isDone ? "line-through opacity-60" : ""}`}
+                    >
+                      {task.label}
+                    </span>
+                    <span className="block font-mono text-[10px] opacity-50 uppercase tracking-wide">
+                      {category.label}
                     </span>
                   </span>
-                  <span className="text-xl">{isDone ? "✅" : "⬜"}</span>
+                  <span
+                    className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E]"
+                    style={{ backgroundColor: isDone ? "#2ED573" : "#FFD43B", color: isDone ? "#fff" : "#1A1A2E" }}
+                  >
+                    {isDone ? "✓" : `+${xp}`}
+                  </span>
                 </button>
               );
             })}
           </div>
         )}
       </div>
+
+      <BottomNav />
     </main>
   );
 }

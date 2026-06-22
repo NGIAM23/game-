@@ -36,11 +36,48 @@ export const RANK_TIERS: RankTier[] = [
 
 const SUB_TIERS = ["IV", "III", "II", "I"]; // IV = bas du tier, I = haut du tier
 
-export function rankFromLevel(level: number): string {
-  const tier = RANK_TIERS.find((t) => level >= t.minLevel && level <= t.maxLevel) ?? RANK_TIERS[RANK_TIERS.length - 1];
-  if (tier.maxLevel === Infinity) return tier.name;
+export function tierForLevel(level: number): RankTier {
+  return RANK_TIERS.find((t) => level >= t.minLevel && level <= t.maxLevel) ?? RANK_TIERS[RANK_TIERS.length - 1];
+}
+
+export function subTierForLevel(level: number, tier: RankTier): string {
+  if (tier.maxLevel === Infinity) return "";
   const span = tier.maxLevel - tier.minLevel + 1;
   const step = Math.max(1, Math.floor(span / 4));
   const sub = Math.min(3, Math.floor((level - tier.minLevel) / step));
-  return `${tier.name} ${SUB_TIERS[sub]}`;
+  return SUB_TIERS[sub];
 }
+
+export function rankFromLevel(level: number): string {
+  const tier = tierForLevel(level);
+  const sub = subTierForLevel(level, tier);
+  return sub ? `${tier.name} ${sub}` : tier.name;
+}
+
+export const TIER_COLORS: Record<string, string> = {
+  Fer: "#6B7280",
+  Bronze: "#A05A2C",
+  Argent: "#9CA3AF",
+  Or: "#E6A700",
+  Platine: "#7DD3C0",
+  Diamant: "#5BC0EB",
+  Maître: "#B388FF",
+  "Grand Maître": "#6750E8",
+  Héros: "#FF7AB6",
+  Légende: "#FFA94D",
+  Mythique: "#6750E8",
+};
+
+export const TIER_ABBR: Record<string, string> = {
+  Fer: "FER",
+  Bronze: "BRZ",
+  Argent: "ARG",
+  Or: "OR",
+  Platine: "PLT",
+  Diamant: "DMT",
+  Maître: "MTR",
+  "Grand Maître": "GM",
+  Héros: "HER",
+  Légende: "LGD",
+  Mythique: "MTH",
+};
