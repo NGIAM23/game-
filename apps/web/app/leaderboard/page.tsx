@@ -25,6 +25,7 @@ const TABS = ["Global", "Dimanche", "Amis"];
 export default function Leaderboard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [sundayRows, setSundayRows] = useState<SundayRow[]>([]);
+  const [friendRows, setFriendRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
@@ -56,6 +57,24 @@ export default function Leaderboard() {
         setSundayRows(sundayData ?? []);
       }
 
+      if (session.session) {
+        const userId = session.session.user.id;
+        const { data: links } = await supabase
+          .from("friends")
+          .select("requester, addressee")
+          .eq("status", "accepted")
+          .or(`requester.eq.${userId},addressee.eq.${userId}`);
+        const friendIds = (links ?? []).map((l) => (l.requester === userId ? l.addressee : l.requester));
+        if (friendIds.length > 0) {
+          const { data: friendProfiles } = await supabase
+            .from("profiles")
+            .select("pseudo, avatar_seed, total_xp")
+            .in("id", friendIds)
+            .order("total_xp", { ascending: false });
+          setFriendRows(friendProfiles ?? []);
+        }
+      }
+
       setLoading(false);
     }
     load();
@@ -64,6 +83,8 @@ export default function Leaderboard() {
   const activeRows: { pseudo: string; avatar_seed: string | null; xp: number }[] =
     tab === "Dimanche"
       ? sundayRows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.sunday_xp }))
+      : tab === "Amis"
+      ? friendRows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.total_xp }))
       : rows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.total_xp }));
 
   const [first, second, third, ...rest] = activeRows;
@@ -80,8 +101,6 @@ export default function Leaderboard() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            title={t === "Amis" ? "Bientôt disponible" : undefined}
-            disabled={t === "Amis"}
             className={`flex-1 text-center font-heading text-xs py-2 rounded-full transition disabled:opacity-40 ${
               tab === t ? "bg-secondary text-white" : "text-outline opacity-50 hover:opacity-80"
             }`}
@@ -105,6 +124,8 @@ export default function Leaderboard() {
         <p className="text-center">{error}</p>
       ) : tab === "Dimanche" && !isSunday() ? (
         <p className="text-center opacity-60">La Course du Dimanche revient... dimanche. ☀️</p>
+      ) : tab === "Amis" && activeRows.length === 0 ? (
+        <p className="text-center opacity-60">Ajoute des amis pour les voir ici. 👥</p>
       ) : activeRows.length === 0 ? (
         <p className="text-center opacity-60">Personne pour l'instant. Sois le premier !</p>
       ) : (

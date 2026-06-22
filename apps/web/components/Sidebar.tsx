@@ -7,12 +7,14 @@ import { supabase } from "@/lib/supabase";
 import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
 import Logo from "./Logo";
 import Avatar from "./Avatar";
+import NotificationBell from "./NotificationBell";
 
 const TABS = [
   { href: "/dashboard", label: "Accueil", icon: "🏠" },
   { href: "/tasks", label: "Tâches", icon: "🎯" },
   { href: "/rank", label: "Mon rang", icon: "🏅" },
   { href: "/leaderboard", label: "Classement", icon: "🏆" },
+  { href: "/friends", label: "Amis", icon: "👥" },
   { href: "/shop", label: "luavio+", icon: "✨" },
 ];
 
@@ -54,18 +56,22 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r-[3px] border-outline bg-surface px-5 py-7">
-      <div className="mb-8 px-1">
+      <div className="mb-8 px-1 flex items-center justify-between">
         <Logo size={26} />
+        <NotificationBell />
       </div>
 
       {profile?.pseudo && (
-        <div className="flex items-center gap-2.5 mb-8 bg-background border-2 border-outline rounded-sticker p-2.5">
+        <Link
+          href={`/u/${profile.pseudo}`}
+          className="flex items-center gap-2.5 mb-8 bg-background border-2 border-outline rounded-sticker p-2.5"
+        >
           <Avatar seed={profile.avatar_seed || profile.pseudo} size={36} />
           <div className="flex-1 overflow-hidden">
             <div className="font-body font-semibold text-xs truncate">@{profile.pseudo}</div>
             <div className="font-mono text-[10px] text-secondary font-semibold">⚡ {profile.sparks}</div>
           </div>
-        </div>
+        </Link>
       )}
 
       <nav className="flex flex-col gap-1.5 flex-1">
