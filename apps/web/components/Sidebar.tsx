@@ -16,6 +16,7 @@ const TABS = [
   { href: "/leaderboard", label: "Classement", icon: "🏆" },
   { href: "/friends", label: "Amis", icon: "👥" },
   { href: "/shop", label: "luavio+", icon: "✨" },
+  { href: "/profile", label: "Mon profil", icon: "🙋" },
 ];
 
 interface MiniProfile {
@@ -127,6 +128,16 @@ export default function Sidebar() {
         <span className="text-lg">🚪</span>
         Quitter
       </button>
+
+      <div className="flex items-center gap-2 px-3.5 pt-2 font-mono text-[10px] uppercase tracking-widest opacity-40">
+        <Link href="/cgu" className="hover:opacity-100 transition">
+          CGU
+        </Link>
+        <span>·</span>
+        <Link href="/confidentialite" className="hover:opacity-100 transition">
+          Confidentialité
+        </Link>
+      </div>
     </aside>
   );
 }

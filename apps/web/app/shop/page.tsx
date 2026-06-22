@@ -198,33 +198,50 @@ function ShopContent() {
         ))}
       </div>
 
-      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mb-3">Cosmétiques</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-        {cosmetics.map((c) => {
-          const isOwned = owned.has(c.id);
-          return (
-            <div key={c.id} className="bg-surface border-2 border-outline rounded-sticker p-3 shadow-[0_2px_0_0_#1A1A2E] text-center">
-              {c.kind === "avatar_bg" ? (
-                <div className="w-10 h-10 rounded-full border-2 border-outline mx-auto mb-2" style={{ backgroundColor: c.value }} />
-              ) : (
-                <div className="text-2xl mb-2">{c.value}</div>
-              )}
-              <div className="font-body font-semibold text-xs mb-2">{c.name}</div>
-              {isOwned ? (
-                <span className="font-mono text-[10px] opacity-50">✓ Possédé</span>
-              ) : (
-                <button
-                  onClick={() => purchaseCosmetic(c.id)}
-                  disabled={busy === c.id || profile.sparks < c.price_sparks}
-                  className="font-heading text-xs bg-primary border-2 border-outline rounded-full px-2.5 py-1 disabled:opacity-40"
-                >
-                  ⚡ {c.price_sparks}
-                </button>
-              )}
+      {(["avatar_bg", "badge"] as const).map((kind) => {
+        const items = cosmetics.filter((c) => c.kind === kind);
+        if (items.length === 0) return null;
+        return (
+          <div key={kind} className="mb-8">
+            <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mb-3">
+              {kind === "avatar_bg" ? "🎨 Fonds d'avatar" : "🏷️ Badges"}
+            </h2>
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-6 px-6 snap-x">
+              {items.map((c) => {
+                const isOwned = owned.has(c.id);
+                return (
+                  <motion.div
+                    key={c.id}
+                    whileHover={{ y: -3 }}
+                    className="snap-start flex-shrink-0 w-32 bg-surface border-2 border-outline rounded-sticker p-3 shadow-[0_3px_0_0_#1A1A2E] text-center"
+                  >
+                    {c.kind === "avatar_bg" ? (
+                      <div
+                        className="w-14 h-14 rounded-full border-2 border-outline mx-auto mb-2"
+                        style={{ background: `linear-gradient(160deg, ${c.value}, #6750E8)` }}
+                      />
+                    ) : (
+                      <div className="text-3xl mb-2">{c.value}</div>
+                    )}
+                    <div className="font-body font-semibold text-xs mb-2 truncate">{c.name}</div>
+                    {isOwned ? (
+                      <span className="font-mono text-[10px] opacity-50">✓ Possédé</span>
+                    ) : (
+                      <button
+                        onClick={() => purchaseCosmetic(c.id)}
+                        disabled={busy === c.id || profile.sparks < c.price_sparks}
+                        className="font-heading text-xs bg-primary border-2 border-outline rounded-full px-2.5 py-1 disabled:opacity-40 w-full"
+                      >
+                        {busy === c.id ? "..." : `⚡ ${c.price_sparks}`}
+                      </button>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </Shell>
   );
 }

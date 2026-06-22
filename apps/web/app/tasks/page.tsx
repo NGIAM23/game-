@@ -287,6 +287,13 @@ export default function TasksPage() {
 
       <SundayBanner className="mb-6" />
 
+      <div className="flex items-center gap-2.5 bg-surface border-2 border-outline rounded-sticker px-3.5 py-2.5 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
+        <span className="text-lg">🤖</span>
+        <p className="font-body text-xs leading-snug">
+          Ajoute une <strong>photo preuve</strong> (📷) sur une tâche : une IA la vérifie et te donne <strong>+15% XP</strong> si c'est convaincant.
+        </p>
+      </div>
+
       {error ? (
         <p className="text-center">{error}</p>
       ) : pool.length === 0 ? (
