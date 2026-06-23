@@ -5,8 +5,7 @@ export type CategoryId =
   | "altruisme"
   | "productivite"
   | "creation"
-  | "detoxEcran"
-  | "bataille";
+  | "detoxEcran";
 
 export interface Category {
   id: CategoryId;
@@ -22,5 +21,4 @@ export const CATEGORIES: Category[] = [
   { id: "productivite", label: "Productivité", icon: "💼" },
   { id: "creation", label: "Création", icon: "🎨" },
   { id: "detoxEcran", label: "Détox écran", icon: "📵" },
-  { id: "bataille", label: "Bataille", icon: "⚔️" },
 ];

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
@@ -30,6 +30,8 @@ export default function FriendsPage() {
   const [searchResult, setSearchResult] = useState<{ id: string; pseudo: string; avatar_seed: string | null } | null | undefined>(undefined);
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [duelTarget, setDuelTarget] = useState<FriendLink | null>(null);
+  const [duelBusy, setDuelBusy] = useState(false);
 
   async function loadLinks(userId: string) {
     const { data } = await supabase
@@ -104,6 +106,22 @@ export default function FriendsPage() {
     if (!meId) return;
     await supabase.from("friends").delete().or(`and(requester.eq.${meId},addressee.eq.${otherId}),and(requester.eq.${otherId},addressee.eq.${meId})`);
     await loadLinks(meId);
+  }
+
+  async function startDuel(mode: "distance" | "reel") {
+    if (!duelTarget) return;
+    setDuelBusy(true);
+    const { data, error } = await supabase.rpc("create_duel", {
+      p_opponent_id: duelTarget.otherId,
+      p_mode: mode,
+    });
+    setDuelBusy(false);
+    if (!error && data) {
+      router.push(`/duel/${data}`);
+    } else {
+      setNotice("Impossible de lancer le duel, réessaie.");
+      setDuelTarget(null);
+    }
   }
 
   if (loading)
@@ -191,12 +209,59 @@ export default function FriendsPage() {
           ) : (
             <div className="flex flex-col gap-2 lg:grid lg:grid-cols-2 lg:gap-2.5">
               {accepted.map((l) => (
-                <FriendCard key={l.otherId} link={l} actionLabel="✕ Retirer" onAction={() => removeLink(l.otherId)} muted />
+                <FriendCard
+                  key={l.otherId}
+                  link={l}
+                  actionLabel="✕ Retirer"
+                  onAction={() => removeLink(l.otherId)}
+                  onDuel={() => setDuelTarget(l)}
+                  muted
+                />
               ))}
             </div>
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {duelTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-outline/60 px-6"
+            onClick={() => !duelBusy && setDuelTarget(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-surface border-[3px] border-outline rounded-sticker p-6 shadow-[0_8px_0_0_#1A1A2E] text-center"
+            >
+              <h2 className="font-heading text-xl mb-1">⚔️ Défier @{duelTarget.profile?.pseudo}</h2>
+              <p className="font-mono text-[11px] opacity-50 mb-5">Choisis le type de duel</p>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={() => startDuel("distance")}
+                  disabled={duelBusy}
+                  className="w-full font-heading bg-primary border-2 border-outline rounded-sticker py-3 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+                >
+                  📍 À distance
+                </button>
+                <button
+                  onClick={() => startDuel("reel")}
+                  disabled={duelBusy}
+                  className="w-full font-heading bg-secondary text-white border-2 border-outline rounded-sticker py-3 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+                >
+                  🤝 En réel (même lieu)
+                </button>
+              </div>
+              {duelBusy && <p className="font-mono text-[11px] opacity-50 mt-3">Envoi du défi...</p>}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Shell>
   );
 }
@@ -205,11 +270,13 @@ function FriendCard({
   link,
   actionLabel,
   onAction,
+  onDuel,
   muted,
 }: {
   link: FriendLink;
   actionLabel: string;
   onAction: () => void;
+  onDuel?: () => void;
   muted?: boolean;
 }) {
   const pseudo = link.profile?.pseudo ?? "?";
@@ -223,6 +290,14 @@ function FriendCard({
       <Link href={`/u/${pseudo}`} className="flex-1 font-body font-semibold text-sm">
         @{pseudo}
       </Link>
+      {onDuel && (
+        <button
+          onClick={onDuel}
+          className="font-heading text-xs border-2 border-outline rounded-full px-3 py-1.5 bg-secondary text-white"
+        >
+          ⚔️ Duel
+        </button>
+      )}
       <button
         onClick={onAction}
         className={`font-heading text-xs border-2 border-outline rounded-full px-3 py-1.5 ${muted ? "opacity-60" : "bg-primary"}`}

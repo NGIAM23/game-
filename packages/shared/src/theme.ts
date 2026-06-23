@@ -15,7 +15,6 @@ export const categoryColors = {
   productivite: "#FF8C00",
   creation: "#8E44AD",
   detoxEcran: "#FFD43B",
-  bataille: "#C0392B",
 } as const;
 
 export const fonts = {

@@ -50,6 +50,7 @@ interface ProfileData {
   current_streak: number;
   sparks: number;
   is_plus: boolean;
+  xp_boost_until: string | null;
 }
 
 export default function ProfilePage() {
@@ -86,7 +87,7 @@ export default function ProfilePage() {
       setIsAnonymous(session.session.user.is_anonymous ?? false);
       const { data } = await supabase
         .from("profiles")
-        .select("pseudo, avatar_seed, total_xp, current_streak, sparks, is_plus")
+        .select("pseudo, avatar_seed, total_xp, current_streak, sparks, is_plus, xp_boost_until")
         .eq("id", session.session.user.id)
         .single();
       if (data) {
@@ -171,12 +172,22 @@ export default function ProfilePage() {
   const rank = rankFromLevel(level);
   const totalCompletions = Object.values(categoryCounts).reduce((a, b) => a + b, 0);
   const profileUrl = origin ? `${origin}/u/${profile.pseudo}` : "";
+  const boostActive = profile.xp_boost_until && new Date(profile.xp_boost_until).getTime() > Date.now();
+  const boostMinutesLeft = boostActive
+    ? Math.max(1, Math.ceil((new Date(profile.xp_boost_until as string).getTime() - Date.now()) / 60000))
+    : 0;
 
   return (
     <Shell wide>
       <h1 className="font-heading text-3xl text-center mb-6">
         Mon <span className="text-secondary">profil</span>
       </h1>
+
+      {boostActive && (
+        <div className="bg-primary border-2 border-outline rounded-sticker p-3 mb-6 text-center font-heading text-sm shadow-[0_3px_0_0_#1A1A2E]">
+          ⚡ Boost XP x2 actif — {boostMinutesLeft} min restantes
+        </div>
+      )}
 
       <div className="lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 lg:items-start">
         <div className="lg:sticky lg:top-12">

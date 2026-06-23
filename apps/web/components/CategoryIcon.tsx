@@ -15,7 +15,6 @@ const TONES: Record<CategoryId, [string, string]> = {
   productivite: ["#FFF1B0", "#FFD43B"],
   creation: ["#D7F4E6", "#27AE60"],
   detoxEcran: ["#DDEFFF", "#2F8FE0"],
-  bataille: ["#FFE2D2", "#E86A2F"],
 };
 
 function IconCorps() {
@@ -108,17 +107,6 @@ function IconDetox() {
   );
 }
 
-function IconBataille() {
-  return (
-    <>
-      <path d="M12 3.2 18.4 5.8v5.8c0 4.3-2.8 7.3-6.4 8.6-3.6-1.3-6.4-4.3-6.4-8.6V5.8z" fill={useFill()} />
-      <path d="M7 7.4c1.4-.7 2.9-1.1 3.6-1.3" stroke="#fff" strokeWidth={0.8} opacity={0.75} strokeLinecap="round" fill="none" />
-      <line x1="8.8" y1="9.2" x2="15.2" y2="15.6" strokeLinecap="round" />
-      <line x1="15.2" y1="9.2" x2="8.8" y2="15.6" strokeLinecap="round" />
-    </>
-  );
-}
-
 const ICONS: Record<CategoryId, () => JSX.Element> = {
   corps: IconCorps,
   esprit: IconEsprit,
@@ -127,7 +115,6 @@ const ICONS: Record<CategoryId, () => JSX.Element> = {
   productivite: IconProductivite,
   creation: IconCreation,
   detoxEcran: IconDetox,
-  bataille: IconBataille,
 };
 
 export default function CategoryIcon({

@@ -8,6 +8,7 @@ interface Notification {
   id: string;
   type: string;
   message: string;
+  link: string | null;
   read: boolean;
   created_at: string;
 }
@@ -22,7 +23,7 @@ export default function NotificationBell() {
       if (!session.session) return;
       const { data } = await supabase
         .from("notifications")
-        .select("id, type, message, read, created_at")
+        .select("id, type, message, link, read, created_at")
         .order("created_at", { ascending: false })
         .limit(20);
       setNotifications(data ?? []);
@@ -62,15 +63,23 @@ export default function NotificationBell() {
             <p className="text-center text-xs opacity-50 py-4 font-body">Aucune notification.</p>
           ) : (
             <div className="flex flex-col gap-1.5">
-              {notifications.map((n) => (
-                <div
-                  key={n.id}
-                  className="font-body text-xs border-2 border-outline rounded-lg px-2.5 py-2"
-                  style={{ backgroundColor: n.read ? "#FFFFFF" : "#FFF4CC" }}
-                >
-                  {n.message}
-                </div>
-              ))}
+              {notifications.map((n) => {
+                const content = (
+                  <div
+                    className="font-body text-xs border-2 border-outline rounded-lg px-2.5 py-2"
+                    style={{ backgroundColor: n.read ? "#FFFFFF" : "#FFF4CC" }}
+                  >
+                    {n.message}
+                  </div>
+                );
+                return n.link ? (
+                  <Link key={n.id} href={n.link} onClick={() => setOpen(false)}>
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={n.id}>{content}</div>
+                );
+              })}
             </div>
           )}
           <Link
