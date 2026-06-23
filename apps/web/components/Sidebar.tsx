@@ -8,6 +8,7 @@ import { NAV_TABS } from "@/lib/navTabs";
 import Logo from "./Logo";
 import Avatar from "./Avatar";
 import NotificationBell from "./NotificationBell";
+import NavIcon from "./NavIcon";
 
 const TABS = NAV_TABS;
 
@@ -91,7 +92,7 @@ export default function Sidebar() {
                   style={{ backgroundColor: "#6750E8" }}
                 />
               )}
-              <span className="text-lg">{tab.icon}</span>
+              <NavIcon id={tab.icon} size={20} />
               {tab.label}
             </Link>
           );
@@ -116,7 +117,7 @@ export default function Sidebar() {
                   }
             }
           >
-            <span className="text-lg">📊</span>
+            <NavIcon id="admin" size={20} />
             Stats (admin)
           </Link>
         )}
@@ -126,7 +127,7 @@ export default function Sidebar() {
         onClick={handleLogout}
         className="flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 border-transparent opacity-50 hover:opacity-100 hover:bg-background transition"
       >
-        <span className="text-lg">🚪</span>
+        <NavIcon id="logout" size={20} />
         Quitter
       </button>
 
