@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
@@ -13,6 +13,19 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    async function check() {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        router.replace("/dashboard");
+        return;
+      }
+      setCheckingSession(false);
+    }
+    check();
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,6 +60,8 @@ export default function AuthPage() {
     }
   }
 
+  if (checkingSession) return null;
+
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
       <motion.form
@@ -59,9 +74,12 @@ export default function AuthPage() {
         <div className="text-center mb-6">
           <Logo size={28} />
         </div>
-        <h1 className="font-heading text-2xl text-center mb-6">
-          {mode === "signup" ? "Créer un compte" : "Connexion"}
+        <h1 className="font-heading text-2xl text-center mb-1">
+          {mode === "signup" ? "Créer un compte Luavio" : "Compte Luavio"}
         </h1>
+        <p className="font-mono text-[11px] uppercase tracking-widest opacity-50 text-center mb-6">
+          Connecte-toi une fois, le jeu se relance seul ensuite
+        </p>
 
         <input
           type="email"
@@ -98,6 +116,10 @@ export default function AuthPage() {
         >
           {mode === "signup" ? "Déjà un compte ? Se connecter" : "Pas de compte ? S'inscrire"}
         </button>
+
+        <p className="font-mono text-[10px] opacity-40 text-center mt-5 leading-snug">
+          Ton compte Luavio te suit sur PC et mobile : connecte-toi une seule fois par appareil, ta progression reste synchronisée.
+        </p>
       </motion.form>
     </main>
   );
