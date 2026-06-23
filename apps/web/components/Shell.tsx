@@ -5,9 +5,24 @@ import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import PageBackdrop, { type PageBackdropId } from "./PageBackdrop";
 import { NAV_TABS } from "@/lib/navTabs";
 
 const SWIPE_THRESHOLD = 60;
+
+const BACKDROP_BY_PREFIX: { prefix: string; id: PageBackdropId }[] = [
+  { prefix: "/dashboard", id: "dashboard" },
+  { prefix: "/tasks", id: "tasks" },
+  { prefix: "/leaderboard", id: "leaderboard" },
+  { prefix: "/friends", id: "friends" },
+  { prefix: "/shop", id: "shop" },
+  { prefix: "/profile", id: "profile" },
+];
+
+function backdropForPathname(pathname: string): PageBackdropId | null {
+  const match = BACKDROP_BY_PREFIX.find((entry) => pathname.startsWith(entry.prefix));
+  return match ? match.id : null;
+}
 
 export default function Shell({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
   const pathname = usePathname();
@@ -38,10 +53,13 @@ export default function Shell({ children, wide = false }: { children: React.Reac
     router.push(NAV_TABS[nextIndex].href);
   }
 
+  const backdropId = backdropForPathname(pathname);
+
   return (
     <div className="min-h-screen lg:flex">
       <Sidebar />
-      <main className="flex-1 px-6 pb-28 lg:pb-12" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <main className="relative flex-1 px-6 pb-28 lg:pb-12" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        {backdropId && <PageBackdrop id={backdropId} />}
         <motion.div
           key={pathname}
           initial={{ opacity: 0, y: 14 }}
