@@ -118,79 +118,85 @@ export default function FriendsPage() {
   const accepted = links.filter((l) => l.status === "accepted");
 
   return (
-    <Shell>
+    <Shell wide>
       <h1 className="font-heading text-3xl text-center mb-1">
         Mes <span className="text-secondary">amis</span>
       </h1>
       <p className="font-mono text-xs uppercase tracking-widest opacity-50 text-center mb-6">Trouve et ajoute tes amis</p>
 
-      <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
-        <div className="flex gap-2">
-          <input
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSearchResult(undefined);
-            }}
-            placeholder="Pseudo exact..."
-            className="flex-1 bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
-          />
-          <button
-            onClick={searchPseudo}
-            disabled={searching || !query.trim()}
-            className="font-heading text-sm bg-primary border-2 border-outline rounded-sticker px-4 py-2 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
-          >
-            🔍
-          </button>
-        </div>
-        {searchResult === null && <p className="text-xs opacity-60 mt-2 font-body">Aucun utilisateur avec ce pseudo.</p>}
-        {searchResult && (
-          <div className="flex items-center gap-3 mt-3 bg-background border-2 border-outline rounded-sticker p-2.5">
-            <Avatar seed={searchResult.avatar_seed || searchResult.pseudo} size={36} />
-            <span className="flex-1 font-body font-semibold text-sm">@{searchResult.pseudo}</span>
-            <button
-              onClick={() => sendRequest(searchResult.id)}
-              className="font-heading text-xs bg-primary border-2 border-outline rounded-full px-3 py-1.5"
-            >
-              ➕ Ajouter
-            </button>
+      <div className="lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-6 lg:items-start">
+        <div>
+          <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
+            <div className="flex gap-2">
+              <input
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setSearchResult(undefined);
+                }}
+                placeholder="Pseudo exact..."
+                className="flex-1 bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+              />
+              <button
+                onClick={searchPseudo}
+                disabled={searching || !query.trim()}
+                className="font-heading text-sm bg-primary border-2 border-outline rounded-sticker px-4 py-2 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+              >
+                🔍
+              </button>
+            </div>
+            {searchResult === null && <p className="text-xs opacity-60 mt-2 font-body">Aucun utilisateur avec ce pseudo.</p>}
+            {searchResult && (
+              <div className="flex items-center gap-3 mt-3 bg-background border-2 border-outline rounded-sticker p-2.5">
+                <Avatar seed={searchResult.avatar_seed || searchResult.pseudo} size={36} />
+                <span className="flex-1 font-body font-semibold text-sm">@{searchResult.pseudo}</span>
+                <button
+                  onClick={() => sendRequest(searchResult.id)}
+                  className="font-heading text-xs bg-primary border-2 border-outline rounded-full px-3 py-1.5"
+                >
+                  ➕ Ajouter
+                </button>
+              </div>
+            )}
+            {notice && <p className="text-xs text-secondary font-semibold mt-2 font-body">{notice}</p>}
           </div>
-        )}
-        {notice && <p className="text-xs text-secondary font-semibold mt-2 font-body">{notice}</p>}
+
+          {received.length > 0 && (
+            <>
+              <h2 className="font-heading text-lg mb-2">Demandes reçues</h2>
+              <div className="flex flex-col gap-2 mb-6">
+                {received.map((l) => (
+                  <FriendCard key={l.otherId} link={l} actionLabel="✓ Accepter" onAction={() => acceptRequest(l.otherId)} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {sent.length > 0 && (
+            <>
+              <h2 className="font-heading text-lg mb-2">Demandes envoyées</h2>
+              <div className="flex flex-col gap-2 mb-6">
+                {sent.map((l) => (
+                  <FriendCard key={l.otherId} link={l} actionLabel="✕ Annuler" onAction={() => removeLink(l.otherId)} muted />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div>
+          <h2 className="font-heading text-lg mb-2">Amis ({accepted.length})</h2>
+          {accepted.length === 0 ? (
+            <p className="text-center opacity-60 font-body text-sm">Aucun ami pour l'instant.</p>
+          ) : (
+            <div className="flex flex-col gap-2 lg:grid lg:grid-cols-2 lg:gap-2.5">
+              {accepted.map((l) => (
+                <FriendCard key={l.otherId} link={l} actionLabel="✕ Retirer" onAction={() => removeLink(l.otherId)} muted />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {received.length > 0 && (
-        <>
-          <h2 className="font-heading text-lg mb-2">Demandes reçues</h2>
-          <div className="flex flex-col gap-2 mb-6">
-            {received.map((l) => (
-              <FriendCard key={l.otherId} link={l} actionLabel="✓ Accepter" onAction={() => acceptRequest(l.otherId)} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {sent.length > 0 && (
-        <>
-          <h2 className="font-heading text-lg mb-2">Demandes envoyées</h2>
-          <div className="flex flex-col gap-2 mb-6">
-            {sent.map((l) => (
-              <FriendCard key={l.otherId} link={l} actionLabel="✕ Annuler" onAction={() => removeLink(l.otherId)} muted />
-            ))}
-          </div>
-        </>
-      )}
-
-      <h2 className="font-heading text-lg mb-2">Amis ({accepted.length})</h2>
-      {accepted.length === 0 ? (
-        <p className="text-center opacity-60 font-body text-sm">Aucun ami pour l'instant.</p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {accepted.map((l) => (
-            <FriendCard key={l.otherId} link={l} actionLabel="✕ Retirer" onAction={() => removeLink(l.otherId)} muted />
-          ))}
-        </div>
-      )}
     </Shell>
   );
 }

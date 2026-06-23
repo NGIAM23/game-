@@ -146,135 +146,147 @@ export default function ProfilePage() {
   const profileUrl = origin ? `${origin}/u/${profile.pseudo}` : "";
 
   return (
-    <Shell>
+    <Shell wide>
       <h1 className="font-heading text-3xl text-center mb-6">
         Mon <span className="text-secondary">profil</span>
       </h1>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-secondary text-white border-[3px] border-outline rounded-sticker p-6 shadow-[0_5px_0_0_#1A1A2E] text-center mb-6"
-      >
-        <div className="flex justify-center mb-3">
-          <Avatar seed={profile.avatar_seed || profile.pseudo} size={72} />
-        </div>
-        <div className="font-heading text-xl mb-0.5">@{profile.pseudo}</div>
-        <div className="font-mono text-xs uppercase tracking-widest opacity-80 mb-3">{rank}</div>
-        <div className="flex items-center justify-center gap-4 font-heading text-sm">
-          <span>Niv. {level}</span>
-          <span>🔥 {profile.current_streak}</span>
-          <span>⚡ {profile.sparks}</span>
-        </div>
-      </motion.div>
-
-      <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
-        <h2 className="font-heading text-base mb-3">✏️ Modifier mon profil</h2>
-        <label className="block font-mono text-[10px] uppercase tracking-widest opacity-50 mb-1">Pseudo</label>
-        <input
-          value={pseudoInput}
-          onChange={(e) => setPseudoInput(e.target.value)}
-          className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
-        />
-        <label className="block font-mono text-[10px] uppercase tracking-widest opacity-50 mb-1">Seed avatar</label>
-        <input
-          value={seedInput}
-          onChange={(e) => setSeedInput(e.target.value)}
-          className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
-        />
-
-        <div className="flex items-center gap-2 mb-3">
-          <Avatar seed={seedInput || profile.pseudo} size={48} />
-          <button
-            onClick={() => setSeedInput(randomAvatarSeed())}
-            className="flex-1 font-heading text-xs bg-background border-2 border-outline rounded-sticker py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+      <div className="lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 lg:items-start">
+        <div className="lg:sticky lg:top-12">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-secondary text-white border-[3px] border-outline rounded-sticker p-6 shadow-[0_5px_0_0_#1A1A2E] text-center mb-6"
           >
-            🎲 Avatar aléatoire
-          </button>
-          <input
-            ref={photoInput}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handlePhotoToAvatar(e.target.files?.[0])}
-          />
-          <button
-            onClick={() => photoInput.current?.click()}
-            disabled={photoBusy}
-            className="flex-1 font-heading text-xs bg-background border-2 border-outline rounded-sticker py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
-          >
-            {photoBusy ? "..." : "📷 Depuis une photo"}
-          </button>
+            <div className="flex justify-center mb-3">
+              <Avatar seed={profile.avatar_seed || profile.pseudo} size={72} />
+            </div>
+            <div className="font-heading text-xl mb-0.5">@{profile.pseudo}</div>
+            <div className="font-mono text-xs uppercase tracking-widest opacity-80 mb-3">{rank}</div>
+            <div className="flex items-center justify-center gap-4 font-heading text-sm">
+              <span>Niv. {level}</span>
+              <span>🔥 {profile.current_streak}</span>
+              <span>⚡ {profile.sparks}</span>
+            </div>
+          </motion.div>
+
+          <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] flex items-center justify-between">
+            <div>
+              <h2 className="font-heading text-base">🔊 Son</h2>
+              <p className="font-mono text-[10px] opacity-50">Active ou coupe les sons de l'app.</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !soundOn;
+                setSoundOn(next);
+                setSoundEnabled(next);
+                if (next) playClick();
+              }}
+              className="font-heading text-sm bg-background border-2 border-outline rounded-sticker px-4 py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+            >
+              {soundOn ? "🔊 Activé" : "🔇 Coupé"}
+            </button>
+          </div>
+
+          {profileUrl && (
+            <div className="bg-surface border-2 border-outline rounded-sticker p-4 text-center shadow-[0_3px_0_0_#1A1A2E]">
+              <h2 className="font-heading text-base mb-3">📱 Mon QR code ami</h2>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(profileUrl)}`}
+                alt="QR code de mon profil"
+                width={180}
+                height={180}
+                className="mx-auto border-2 border-outline rounded-lg mb-2"
+              />
+              <p className="font-mono text-[11px] opacity-50">Fais scanner ce code pour qu'on t'ajoute en ami.</p>
+            </div>
+          )}
         </div>
-        <p className="font-mono text-[10px] opacity-50 leading-snug mb-3">
-          🔒 Ta photo est traitée uniquement sur ton appareil pour générer un avatar : elle n'est jamais envoyée ni stockée
-          par Luavio.
-        </p>
 
-        <button
-          onClick={save}
-          disabled={saving}
-          className="w-full font-heading bg-primary border-2 border-outline rounded-sticker py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
-        >
-          {saving ? "..." : "Enregistrer"}
-        </button>
-        {notice && <p className="text-xs text-center mt-2 font-body font-semibold">{notice}</p>}
-      </div>
-
-      <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-base">🔊 Son</h2>
-          <p className="font-mono text-[10px] opacity-50">Active ou coupe les sons de l'app.</p>
-        </div>
-        <button
-          onClick={() => {
-            const next = !soundOn;
-            setSoundOn(next);
-            setSoundEnabled(next);
-            if (next) playClick();
-          }}
-          className="font-heading text-sm bg-background border-2 border-outline rounded-sticker px-4 py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
-        >
-          {soundOn ? "🔊 Activé" : "🔇 Coupé"}
-        </button>
-      </div>
-
-      <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
-        <h2 className="font-heading text-base mb-3">📊 Mes statistiques</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {CATEGORIES.map((cat) => {
-            const count = categoryCounts[cat.id] ?? 0;
-            const pct = totalCompletions > 0 ? Math.round((count / totalCompletions) * 100) : 0;
-            return (
-              <div
-                key={cat.id}
-                className="border-2 border-outline rounded-lg p-2 text-center"
-                style={{ backgroundColor: categoryColors[cat.id] }}
-              >
-                <div className="flex justify-center mb-0.5">
-                  <CategoryIcon id={cat.id} size={20} />
-                </div>
-                <div className="font-heading text-[11px]">{pct}%</div>
+          <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
+            <h2 className="font-heading text-base mb-3">✏️ Modifier mon profil</h2>
+            <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-widest opacity-50 mb-1">Pseudo</label>
+                <input
+                  value={pseudoInput}
+                  onChange={(e) => setPseudoInput(e.target.value)}
+                  className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
+                />
               </div>
-            );
-          })}
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-widest opacity-50 mb-1">Seed avatar</label>
+                <input
+                  value={seedInput}
+                  onChange={(e) => setSeedInput(e.target.value)}
+                  className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-3">
+              <Avatar seed={seedInput || profile.pseudo} size={48} />
+              <button
+                onClick={() => setSeedInput(randomAvatarSeed())}
+                className="flex-1 font-heading text-xs bg-background border-2 border-outline rounded-sticker py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+              >
+                🎲 Avatar aléatoire
+              </button>
+              <input
+                ref={photoInput}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handlePhotoToAvatar(e.target.files?.[0])}
+              />
+              <button
+                onClick={() => photoInput.current?.click()}
+                disabled={photoBusy}
+                className="flex-1 font-heading text-xs bg-background border-2 border-outline rounded-sticker py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+              >
+                {photoBusy ? "..." : "📷 Depuis une photo"}
+              </button>
+            </div>
+            <p className="font-mono text-[10px] opacity-50 leading-snug mb-3">
+              🔒 Ta photo est traitée uniquement sur ton appareil pour générer un avatar : elle n'est jamais envoyée ni stockée
+              par Luavio.
+            </p>
+
+            <button
+              onClick={save}
+              disabled={saving}
+              className="w-full lg:w-auto lg:px-10 font-heading bg-primary border-2 border-outline rounded-sticker py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+            >
+              {saving ? "..." : "Enregistrer"}
+            </button>
+            {notice && <p className="text-xs text-center mt-2 font-body font-semibold">{notice}</p>}
+          </div>
+
+          <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
+            <h2 className="font-heading text-base mb-3">📊 Mes statistiques</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+              {CATEGORIES.map((cat) => {
+                const count = categoryCounts[cat.id] ?? 0;
+                const pct = totalCompletions > 0 ? Math.round((count / totalCompletions) * 100) : 0;
+                return (
+                  <div
+                    key={cat.id}
+                    className="border-2 border-outline rounded-lg p-2 text-center"
+                    style={{ backgroundColor: categoryColors[cat.id] }}
+                  >
+                    <div className="flex justify-center mb-0.5">
+                      <CategoryIcon id={cat.id} size={20} />
+                    </div>
+                    <div className="font-heading text-[11px]">{pct}%</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
-
-      {profileUrl && (
-        <div className="bg-surface border-2 border-outline rounded-sticker p-4 text-center shadow-[0_3px_0_0_#1A1A2E]">
-          <h2 className="font-heading text-base mb-3">📱 Mon QR code ami</h2>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(profileUrl)}`}
-            alt="QR code de mon profil"
-            width={180}
-            height={180}
-            className="mx-auto border-2 border-outline rounded-lg mb-2"
-          />
-          <p className="font-mono text-[11px] opacity-50">Fais scanner ce code pour qu'on t'ajoute en ami.</p>
-        </div>
-      )}
     </Shell>
   );
 }

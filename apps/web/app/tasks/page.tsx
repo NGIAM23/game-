@@ -277,7 +277,7 @@ export default function TasksPage() {
   }
 
   return (
-    <Shell>
+    <Shell wide>
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-heading text-2xl">Aujourd'hui</h2>
         <span className="font-heading text-xs bg-surface border-2 border-outline rounded-full px-3 py-1 shadow-[0_2px_0_0_#1A1A2E]">
@@ -301,7 +301,7 @@ export default function TasksPage() {
         <p className="text-center opacity-60">Aucune tâche disponible pour le moment.</p>
       ) : (
         <>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 lg:grid lg:grid-cols-2 lg:gap-3">
             <AnimatePresence initial={false}>
               {visible.map((task, i) => renderTask(task, i, doneIds.has(task.id), false))}
             </AnimatePresence>
@@ -326,7 +326,7 @@ export default function TasksPage() {
       {weeklyTasks.length > 0 && (
         <>
           <h2 className="font-heading text-xl mt-8 mb-3">📅 Défis de la semaine</h2>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 lg:grid lg:grid-cols-2 lg:gap-3">
             {weeklyTasks.map((task, i) => renderTask(task, i, weeklyDoneIds.has(task.id), true))}
           </div>
         </>

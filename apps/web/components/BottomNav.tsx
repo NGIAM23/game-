@@ -13,7 +13,7 @@ export default function BottomNav() {
   const activeRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    activeRef.current?.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" });
   }, [pathname]);
 
   async function handleLogout() {
