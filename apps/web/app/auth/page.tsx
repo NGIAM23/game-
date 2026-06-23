@@ -14,6 +14,9 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileHandle>(null);
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
 
   useEffect(() => {
     async function check() {
@@ -45,6 +48,25 @@ export default function AuthPage() {
       return;
     }
     if (data.session) router.push("/onboarding");
+  }
+
+  async function signInWithEmail() {
+    if (!emailInput.trim() || !passwordInput) {
+      setError("Renseigne ton email et ton mot de passe.");
+      return;
+    }
+    setBusy("id");
+    setError(null);
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email: emailInput.trim(),
+      password: passwordInput,
+    });
+    setBusy(null);
+    if (signInError) {
+      setError("Email ou mot de passe incorrect.");
+      return;
+    }
+    if (data.session) router.push("/dashboard");
   }
 
   async function continueWith(provider: "google" | "apple") {
@@ -118,6 +140,41 @@ export default function AuthPage() {
             🍎 {busy === "apple" ? "..." : "Continuer avec Apple"}
           </button>
         </div>
+
+        {showEmailLogin ? (
+          <div className="mt-4 flex flex-col gap-2.5">
+            <input
+              type="email"
+              placeholder="ton@email.fr"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+            />
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+            />
+            <button
+              type="button"
+              onClick={signInWithEmail}
+              disabled={busy !== null}
+              className="w-full font-heading bg-primary border-2 border-outline rounded-sticker py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+            >
+              {busy === "id" ? "..." : "Se connecter"}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowEmailLogin(true)}
+            className="w-full font-mono text-[11px] uppercase tracking-widest opacity-50 text-center mt-4 underline"
+          >
+            J&apos;ai déjà un compte lié à un email
+          </button>
+        )}
 
         <Turnstile ref={turnstileRef} onToken={setCaptchaToken} />
 

@@ -65,6 +65,11 @@ export default function ProfilePage() {
   const [soundOn, setSoundOn] = useState(true);
   const [photoBusy, setPhotoBusy] = useState(false);
   const photoInput = useRef<HTMLInputElement | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [linkEmail, setLinkEmail] = useState("");
+  const [linkPassword, setLinkPassword] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [linkNotice, setLinkNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setSoundOn(isSoundEnabled());
@@ -78,6 +83,7 @@ export default function ProfilePage() {
         router.push("/auth");
         return;
       }
+      setIsAnonymous(session.session.user.is_anonymous ?? false);
       const { data } = await supabase
         .from("profiles")
         .select("pseudo, avatar_seed, total_xp, current_streak, sparks, is_plus")
@@ -117,6 +123,27 @@ export default function ProfilePage() {
       setProfile({ ...profile, pseudo: pseudoInput.trim(), avatar_seed: seedInput.trim() });
       setNotice("Profil mis à jour !");
     }
+  }
+
+  async function linkAccount() {
+    if (!linkEmail.trim() || linkPassword.length < 6) {
+      setLinkNotice("Renseigne un email valide et un mot de passe de 6 caractères minimum.");
+      return;
+    }
+    setLinkBusy(true);
+    setLinkNotice(null);
+    const { error } = await supabase.auth.updateUser(
+      { email: linkEmail.trim(), password: linkPassword },
+      { emailRedirectTo: `${origin}/profile` }
+    );
+    setLinkBusy(false);
+    if (error) {
+      setLinkNotice(error.message.includes("already") ? "Cet email est déjà utilisé par un autre compte." : "Impossible de lier cet email, réessaie.");
+      return;
+    }
+    setLinkNotice("Vérifie ta boîte mail et clique sur le lien de confirmation pour activer la récupération multi-appareils.");
+    setLinkEmail("");
+    setLinkPassword("");
   }
 
   async function handlePhotoToAvatar(file: File | undefined) {
@@ -187,6 +214,38 @@ export default function ProfilePage() {
               {soundOn ? "🔊 Activé" : "🔇 Coupé"}
             </button>
           </div>
+
+          {isAnonymous && (
+            <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
+              <h2 className="font-heading text-base mb-1">🔐 Sécuriser mon compte</h2>
+              <p className="font-mono text-[10px] opacity-50 leading-snug mb-3">
+                Ton Luavio ID est lié à cet appareil. Ajoute un email + mot de passe pour retrouver ta progression sur un autre
+                appareil.
+              </p>
+              <input
+                type="email"
+                placeholder="ton@email.fr"
+                value={linkEmail}
+                onChange={(e) => setLinkEmail(e.target.value)}
+                className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-2"
+              />
+              <input
+                type="password"
+                placeholder="Mot de passe (6 caractères min.)"
+                value={linkPassword}
+                onChange={(e) => setLinkPassword(e.target.value)}
+                className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
+              />
+              <button
+                onClick={linkAccount}
+                disabled={linkBusy}
+                className="w-full font-heading bg-primary border-2 border-outline rounded-sticker py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+              >
+                {linkBusy ? "..." : "Lier cet email à mon compte"}
+              </button>
+              {linkNotice && <p className="text-xs text-center mt-2 font-body font-semibold">{linkNotice}</p>}
+            </div>
+          )}
 
           {profileUrl && (
             <div className="bg-surface border-2 border-outline rounded-sticker p-4 text-center shadow-[0_3px_0_0_#1A1A2E]">
