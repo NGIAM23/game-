@@ -24,6 +24,15 @@ export const TASK_POOL: Task[] = [
   { id: "ecrire-500-mots", category: "creation", label: "Écrire 500 mots", baseXp: 25 },
   { id: "limite-ecran", category: "detoxEcran", label: "Limite écran <2h", baseXp: 30 },
   { id: "pas-de-reseaux", category: "detoxEcran", label: "Pas de réseaux sociaux 1 jour", baseXp: 35 },
+  // Tâches courtes et faciles, pour finir la liste du jour plus vite.
+  { id: "jeter-papier-poubelle", category: "altruisme", label: "Jeter un papier qui traîne à la poubelle", baseXp: 10 },
+  { id: "faire-son-lit", category: "productivite", label: "Faire son lit", baseXp: 10 },
+  { id: "sortir-poubelles", category: "productivite", label: "Sortir les poubelles", baseXp: 10 },
+  { id: "ranger-3-objets", category: "productivite", label: "Ranger 3 objets qui traînent", baseXp: 10 },
+  { id: "arroser-plante", category: "altruisme", label: "Arroser une plante", baseXp: 10 },
+  { id: "boire-verre-eau", category: "corps", label: "Boire un verre d'eau", baseXp: 10 },
+  { id: "aerer-piece", category: "corps", label: "Aérer une pièce 5 min", baseXp: 10 },
+  { id: "dire-merci", category: "social", label: "Dire merci sincèrement à quelqu'un", baseXp: 10 },
 ];
 
 // Tâches détox écran = XP ×3 à ×5 (signature du jeu, voir RECAP_FINAL §3)

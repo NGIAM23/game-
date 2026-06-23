@@ -73,3 +73,26 @@ export function playError() {
     tone(220, 0, 0.18, 0.1, "sawtooth");
   });
 }
+
+// Tâche faite : tic de suspens qui monte en hauteur/intensité avec le nombre
+// de tâches déjà complétées (combo), pour donner une sensation de montée.
+export function playSuspense(comboCount: number) {
+  play(() => {
+    const step = Math.min(comboCount, 10);
+    const freq = 300 + step * 45;
+    const gain = Math.min(0.06 + step * 0.01, 0.18);
+    tone(freq, 0, 0.1, gain, "triangle");
+    tone(freq * 1.5, 0.06, 0.12, gain * 0.8, "triangle");
+  });
+}
+
+// Toutes les tâches du jour terminées : fanfare finale.
+export function playVictory() {
+  play(() => {
+    tone(523, 0, 0.14, 0.16);
+    tone(659, 0.12, 0.14, 0.16);
+    tone(784, 0.24, 0.14, 0.16);
+    tone(988, 0.36, 0.16, 0.18);
+    tone(1318, 0.5, 0.35, 0.2);
+  });
+}

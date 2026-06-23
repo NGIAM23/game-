@@ -8,7 +8,7 @@ import { CATEGORIES, categoryColors, isSunday, levelFromTotalXp, type CategoryId
 import Shell from "@/components/Shell";
 import SundayBanner from "@/components/SundayBanner";
 import CategoryIcon from "@/components/CategoryIcon";
-import { playTaskComplete, playLevelUp } from "@/lib/sound";
+import { playTaskComplete, playLevelUp, playSuspense, playVictory } from "@/lib/sound";
 
 type Location = "home" | "outside" | "any";
 type Frequency = "daily" | "weekly";
@@ -153,18 +153,26 @@ export default function TasksPage() {
     setPending(null);
 
     if (!rpcError && typeof xpAwarded === "number") {
+      let newDoneIds = doneIds;
       if (isWeekly) {
         setWeeklyDoneIds((prev) => new Set(prev).add(taskId));
       } else {
-        setDoneIds((prev) => new Set(prev).add(taskId));
+        newDoneIds = new Set(doneIds).add(taskId);
+        setDoneIds(newDoneIds);
         setXpToday((prev) => prev + xpAwarded);
       }
 
       const newTotalXp = totalXp + xpAwarded;
       const leveledUp = levelFromTotalXp(totalXp).level !== levelFromTotalXp(newTotalXp).level;
       setTotalXp(newTotalXp);
-      if (leveledUp) playLevelUp();
-      else playTaskComplete();
+
+      const allDone = !isWeekly && pool.length > 0 && pool.every((t) => newDoneIds.has(t.id));
+      if (allDone) playVictory();
+      else if (leveledUp) playLevelUp();
+      else {
+        playTaskComplete();
+        playSuspense(newDoneIds.size);
+      }
     }
   }
 
@@ -196,6 +204,7 @@ export default function TasksPage() {
   const visible = pool.slice(0, revealedCount);
   const allVisibleDone = visible.length > 0 && visible.every((t) => doneIds.has(t.id));
   const hasMore = revealedCount < pool.length;
+  const gameFinished = pool.length > 0 && pool.every((t) => doneIds.has(t.id));
 
   function renderTask(task: TaskRow, i: number, isDone: boolean, isWeekly: boolean) {
     const category = CATEGORIES.find((c) => c.id === task.category)!;
@@ -287,6 +296,19 @@ export default function TasksPage() {
       <p className="font-heading text-xl text-secondary mb-4">+{xpToday} XP aujourd'hui</p>
 
       <SundayBanner className="mb-6" />
+
+      {gameFinished && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2.5 bg-secondary text-white border-2 border-outline rounded-sticker px-3.5 py-3 mb-6 shadow-[0_3px_0_0_#1A1A2E]"
+        >
+          <span className="text-xl">🏆</span>
+          <p className="font-heading text-sm leading-snug">
+            Jeu terminé pour aujourd'hui ! Toutes les tâches sont faites, reviens demain pour de nouvelles tâches.
+          </p>
+        </motion.div>
+      )}
 
       <div className="flex items-center gap-2.5 bg-surface border-2 border-outline rounded-sticker px-3.5 py-2.5 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
         <span className="text-lg">🤖</span>
