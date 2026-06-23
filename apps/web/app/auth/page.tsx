@@ -8,12 +8,9 @@ import Logo from "@/components/Logo";
 
 export default function AuthPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"signup" | "login">("signup");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [busy, setBusy] = useState<"id" | "google" | "apple" | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function check() {
@@ -27,100 +24,96 @@ export default function AuthPage() {
     check();
   }, [router]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-
-    if (mode === "signup") {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-      });
-      setLoading(false);
-      if (error) {
-        setMessage(error.message);
-        return;
-      }
-      if (data.session) {
-        router.push("/onboarding");
-        return;
-      }
-      setMessage("Compte créé ! Vérifie ton email pour confirmer, puis reviens te connecter.");
+  async function createLuavioId() {
+    setBusy("id");
+    setError(null);
+    const { data, error: signInError } = await supabase.auth.signInAnonymously();
+    setBusy(null);
+    if (signInError) {
+      setError("Impossible de créer ton Luavio ID, réessaie.");
       return;
     }
+    if (data.session) router.push("/onboarding");
+  }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setMessage(error.message);
-    } else {
-      router.push("/dashboard");
+  async function continueWith(provider: "google" | "apple") {
+    setBusy(provider);
+    setError(null);
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    });
+    if (oauthError) {
+      setError("Connexion impossible, réessaie.");
+      setBusy(null);
     }
   }
 
   if (checkingSession) return null;
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
-      <motion.form
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+    <main className="min-h-screen flex items-center justify-center px-6 bg-outline/50">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.92 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.35 }}
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-surface border-[3px] border-outline rounded-sticker p-7 shadow-[0_5px_0_0_#1A1A2E]"
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="w-full max-w-sm bg-surface border-[3px] border-outline rounded-sticker p-7 shadow-[0_8px_0_0_#1A1A2E]"
       >
-        <div className="text-center mb-6">
-          <Logo size={28} />
-        </div>
-        <h1 className="font-heading text-2xl text-center mb-1">
-          {mode === "signup" ? "Créer un compte Luavio" : "Compte Luavio"}
-        </h1>
-        <p className="font-mono text-[11px] uppercase tracking-widest opacity-50 text-center mb-6">
-          Connecte-toi une fois, le jeu se relance seul ensuite
-        </p>
-
-        <input
-          type="email"
-          placeholder="email@exemple.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full border-2 border-outline rounded-sticker px-4 py-2.5 mb-3 outline-none focus:border-secondary transition"
-        />
-        <input
-          type="password"
-          placeholder="mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-          className="w-full border-2 border-outline rounded-sticker px-4 py-2.5 mb-4 outline-none focus:border-secondary transition"
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full font-heading bg-primary border-2 border-outline rounded-sticker py-3 shadow-[0_4px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.45, delay: 0.15, type: "spring", bounce: 0.5 }}
+          className="flex flex-col items-center text-center mb-6"
         >
-          {loading ? "..." : mode === "signup" ? "S'inscrire" : "Se connecter"}
-        </button>
-
-        {message && <p className="text-sm text-center mt-4">{message}</p>}
+          <Logo size={32} />
+          <h1 className="font-heading text-2xl mt-3">
+            Luavio <span className="text-secondary">ID</span>
+          </h1>
+          <p className="font-mono text-[11px] uppercase tracking-widest opacity-50 mt-1">
+            Un compte, créé en un instant
+          </p>
+        </motion.div>
 
         <button
           type="button"
-          onClick={() => setMode(mode === "signup" ? "login" : "signup")}
-          className="w-full text-sm text-secondary mt-4 underline"
+          onClick={createLuavioId}
+          disabled={busy !== null}
+          className="w-full font-heading bg-primary border-2 border-outline rounded-sticker py-3 shadow-[0_4px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 mb-4"
         >
-          {mode === "signup" ? "Déjà un compte ? Se connecter" : "Pas de compte ? S'inscrire"}
+          {busy === "id" ? "..." : "✨ Créer mon Luavio ID"}
         </button>
+
+        <div className="flex items-center gap-3 mb-4">
+          <span className="flex-1 h-px bg-outline/20" />
+          <span className="font-mono text-[10px] uppercase tracking-widest opacity-40">ou</span>
+          <span className="flex-1 h-px bg-outline/20" />
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={() => continueWith("google")}
+            disabled={busy !== null}
+            className="w-full font-body font-semibold text-sm bg-white border-2 border-outline rounded-sticker py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            🔵 {busy === "google" ? "..." : "Continuer avec Google"}
+          </button>
+          <button
+            type="button"
+            onClick={() => continueWith("apple")}
+            disabled={busy !== null}
+            className="w-full font-body font-semibold text-sm bg-white border-2 border-outline rounded-sticker py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            🍎 {busy === "apple" ? "..." : "Continuer avec Apple"}
+          </button>
+        </div>
+
+        {error && <p className="text-sm text-center mt-4 text-cat-corps">{error}</p>}
 
         <p className="font-mono text-[10px] opacity-40 text-center mt-5 leading-snug">
           Ton compte Luavio te suit sur PC et mobile : connecte-toi une seule fois par appareil, ta progression reste synchronisée.
         </p>
-      </motion.form>
+      </motion.div>
     </main>
   );
 }
