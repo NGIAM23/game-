@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import PageBackdrop, { type PageBackdropId } from "./PageBackdrop";
+import VolumeMenu from "./VolumeMenu";
 import { NAV_TABS } from "@/lib/navTabs";
 import { startAmbientMusic } from "@/lib/sound";
 
@@ -71,6 +72,7 @@ export default function Shell({ children, wide = false }: { children: React.Reac
       <Sidebar />
       <main className="relative flex-1 px-6 pb-28 lg:pb-12" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {backdropId && <PageBackdrop id={backdropId} />}
+        <VolumeMenu />
         <motion.div
           key={pathname}
           initial={{ opacity: 0, y: 14 }}

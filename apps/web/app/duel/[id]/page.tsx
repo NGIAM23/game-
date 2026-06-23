@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
-import { playMissionSuspense, playLevelUp, playError } from "@/lib/sound";
+import { playMissionSuspense, playDuelVictory, playError } from "@/lib/sound";
 
 interface DuelRow {
   id: string;
@@ -48,6 +48,20 @@ interface MeetingCandidate {
   lat: number;
   lng: number;
   distance: number;
+}
+
+interface VerifyResult {
+  verified: boolean;
+  reason: string;
+}
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -96,8 +110,11 @@ export default function DuelPage() {
   const [now, setNow] = useState(Date.now());
   const [burst, setBurst] = useState<number | null>(null);
   const [choosingSpot, setChoosingSpot] = useState(false);
+  const [verifyResults, setVerifyResults] = useState<Record<string, VerifyResult>>({});
+  const [verifying, setVerifying] = useState<string | null>(null);
   const finishingRef = useRef(false);
   const candidatesFetchedRef = useRef(false);
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const load = useCallback(async () => {
     const { data: session } = await supabase.auth.getSession();
@@ -240,6 +257,31 @@ export default function DuelPage() {
     load();
   }
 
+  async function handlePhoto(missionId: string, label: string, file: File | undefined) {
+    if (!file) return;
+    setVerifying(missionId);
+    try {
+      const imageBase64 = await fileToBase64(file);
+      const res = await fetch("/api/verify-task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskLabel: label, imageBase64, mimeType: file.type }),
+      });
+      const data = await res.json();
+      const verified = !!data.verified;
+      setVerifyResults((prev) => ({ ...prev, [missionId]: { verified, reason: data.reason ?? "" } }));
+      if (verified) {
+        await completeMission(missionId);
+      } else {
+        playError();
+      }
+    } catch {
+      setVerifyResults((prev) => ({ ...prev, [missionId]: { verified: false, reason: "Erreur réseau." } }));
+      playError();
+    }
+    setVerifying(null);
+  }
+
   useEffect(() => {
     if (!duel || duel.status !== "meeting") return;
     if (duel.meeting_lat === null || duel.meeting_lng === null) return;
@@ -280,7 +322,7 @@ export default function DuelPage() {
   useEffect(() => {
     if (duel?.status !== "finished" || finishedSoundRef.current) return;
     finishedSoundRef.current = true;
-    if (duel.winner_id === meId) playLevelUp();
+    if (duel.winner_id === meId) playDuelVictory();
   }, [duel, meId]);
 
   if (loading)
@@ -479,19 +521,39 @@ export default function DuelPage() {
           <div className="flex flex-col gap-2">
             {missions.map((m) => {
               const done = myCompleted.has(m.mission_id);
+              const result = verifyResults[m.mission_id];
+              const isVerifying = verifying === m.mission_id;
               return (
-                <motion.button
-                  key={m.mission_id}
-                  onClick={() => !done && completeMission(m.mission_id)}
-                  disabled={done}
-                  whileTap={{ scale: 0.97 }}
-                  className={`flex items-center justify-between border-2 border-outline rounded-sticker px-4 py-3 font-body text-sm shadow-[0_2px_0_0_#1A1A2E] transition ${
-                    done ? "bg-primary" : "bg-white"
-                  }`}
-                >
-                  <span>{m.label}</span>
-                  <span>{done ? "✅" : oppCompleted.has(m.mission_id) ? "🔥" : "⚡"}</span>
-                </motion.button>
+                <div key={m.mission_id} className="flex flex-col gap-1">
+                  <motion.button
+                    onClick={() => !done && !isVerifying && fileInputs.current[m.mission_id]?.click()}
+                    disabled={done || isVerifying}
+                    whileTap={{ scale: 0.97 }}
+                    className={`flex items-center justify-between border-2 border-outline rounded-sticker px-4 py-3 font-body text-sm shadow-[0_2px_0_0_#1A1A2E] transition ${
+                      done ? "bg-primary" : "bg-white"
+                    }`}
+                  >
+                    <span>{m.label}</span>
+                    <span>{done ? "✅" : isVerifying ? "🤖" : oppCompleted.has(m.mission_id) ? "🔥" : "📷"}</span>
+                  </motion.button>
+                  {!done && result && !result.verified && (
+                    <p className="font-mono text-[10px] text-cat-corps px-1">⚠️ {result.reason || "Photo refusée, réessaie."}</p>
+                  )}
+                  <input
+                    ref={(el) => {
+                      fileInputs.current[m.mission_id] = el;
+                    }}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      handlePhoto(m.mission_id, m.label, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
               );
             })}
           </div>
