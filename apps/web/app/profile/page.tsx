@@ -8,7 +8,7 @@ import { levelFromTotalXp, rankFromLevel, randomAvatarSeed, CATEGORIES, category
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import CategoryIcon from "@/components/CategoryIcon";
-import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
+import { isSoundEnabled, setSoundEnabled, playClick, startAmbientMusic, stopAmbientMusic } from "@/lib/sound";
 
 function seedFromPhoto(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -218,7 +218,12 @@ export default function ProfilePage() {
                 const next = !soundOn;
                 setSoundOn(next);
                 setSoundEnabled(next);
-                if (next) playClick();
+                if (next) {
+                  playClick();
+                  startAmbientMusic();
+                } else {
+                  stopAmbientMusic();
+                }
               }}
               className="font-heading text-sm bg-background border-2 border-outline rounded-sticker px-4 py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
             >

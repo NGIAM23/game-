@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import PageBackdrop, { type PageBackdropId } from "./PageBackdrop";
 import { NAV_TABS } from "@/lib/navTabs";
+import { startAmbientMusic } from "@/lib/sound";
 
 const SWIPE_THRESHOLD = 60;
 
@@ -54,6 +55,16 @@ export default function Shell({ children, wide = false }: { children: React.Reac
   }
 
   const backdropId = backdropForPathname(pathname);
+
+  useEffect(() => {
+    // Les navigateurs bloquent l'audio avant une interaction utilisateur :
+    // on démarre la musique d'ambiance dès le premier geste sur l'app.
+    function unlock() {
+      startAmbientMusic();
+    }
+    document.addEventListener("pointerdown", unlock, { once: true });
+    return () => document.removeEventListener("pointerdown", unlock);
+  }, []);
 
   return (
     <div className="min-h-screen lg:flex">

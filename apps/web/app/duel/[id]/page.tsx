@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
+import { playMissionSuspense, playLevelUp, playError } from "@/lib/sound";
 
 interface DuelRow {
   id: string;
@@ -226,9 +227,16 @@ export default function DuelPage() {
   }
 
   async function completeMission(missionId: string) {
-    setMyCompleted((prev) => new Set(prev).add(missionId));
+    let comboIndex = 0;
+    setMyCompleted((prev) => {
+      const next = new Set(prev).add(missionId);
+      comboIndex = next.size;
+      return next;
+    });
     setBurst(Date.now());
-    await supabase.rpc("complete_duel_mission", { p_duel_id: duelId, p_mission_id: missionId });
+    playMissionSuspense(comboIndex);
+    const { error: rpcError } = await supabase.rpc("complete_duel_mission", { p_duel_id: duelId, p_mission_id: missionId });
+    if (rpcError) playError();
     load();
   }
 
@@ -267,6 +275,13 @@ export default function DuelPage() {
       finishingRef.current = false;
     });
   }, [duel, now, duelId, load]);
+
+  const finishedSoundRef = useRef(false);
+  useEffect(() => {
+    if (duel?.status !== "finished" || finishedSoundRef.current) return;
+    finishedSoundRef.current = true;
+    if (duel.winner_id === meId) playLevelUp();
+  }, [duel, meId]);
 
   if (loading)
     return (

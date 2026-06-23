@@ -73,3 +73,62 @@ export function playError() {
     tone(220, 0, 0.18, 0.1, "sawtooth");
   });
 }
+
+// Musique de fond calme, en boucle, à volume discret pendant toute la partie.
+const AMBIENT_CHORD = [220, 277.18, 329.63]; // accord doux (A3, C#4, E4)
+let ambientInterval: ReturnType<typeof setInterval> | null = null;
+let ambientPlaying = false;
+
+function ambientPad() {
+  const audio = getCtx();
+  if (!audio) return;
+  AMBIENT_CHORD.forEach((freq, i) => {
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const start = audio.currentTime + i * 0.18;
+    const duration = 6.5;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(0.025, start + 1.8);
+    gain.gain.linearRampToValueAtTime(0, start + duration);
+    osc.connect(gain);
+    gain.connect(audio.destination);
+    osc.start(start);
+    osc.stop(start + duration);
+  });
+}
+
+export function startAmbientMusic() {
+  if (ambientPlaying || !isSoundEnabled()) return;
+  ambientPlaying = true;
+  ambientPad();
+  ambientInterval = setInterval(() => {
+    if (!isSoundEnabled()) {
+      stopAmbientMusic();
+      return;
+    }
+    ambientPad();
+  }, 5500);
+}
+
+export function stopAmbientMusic() {
+  ambientPlaying = false;
+  if (ambientInterval) {
+    clearInterval(ambientInterval);
+    ambientInterval = null;
+  }
+}
+
+// Son de plus en plus tendu à chaque mission de duel réussie : la hauteur
+// monte et une couche supplémentaire s'ajoute avec le combo.
+export function playMissionSuspense(comboIndex: number) {
+  play(() => {
+    const base = 420 + comboIndex * 55;
+    const gap = Math.max(0.05, 0.13 - comboIndex * 0.012);
+    tone(base, 0, 0.1, 0.11, "triangle");
+    tone(base * 1.5, gap, 0.12, 0.11, "triangle");
+    if (comboIndex >= 2) tone(base * 2, gap * 2, 0.14, 0.12, "sawtooth");
+    if (comboIndex >= 4) tone(base * 2.5, gap * 2.6, 0.18, 0.13, "sawtooth");
+  });
+}
