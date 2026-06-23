@@ -2,24 +2,17 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { usePathname } from "next/navigation";
 import { NAV_TABS as TABS } from "@/lib/navTabs";
 import NavIcon from "./NavIcon";
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const activeRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
     activeRef.current?.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" });
   }, [pathname]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/auth");
-  }
 
   return (
     <nav
@@ -60,14 +53,6 @@ export default function BottomNav() {
             </Link>
           );
         })}
-        <button
-          onClick={handleLogout}
-          className="flex flex-col items-center justify-center gap-0.5 font-heading text-[9px] uppercase flex-shrink-0 w-16 py-2 rounded-2xl border-2 border-transparent opacity-60"
-          style={{ color: "#FFF8E7" }}
-        >
-          <NavIcon id="logout" size={20} />
-          <span className="leading-none">Quitter</span>
-        </button>
       </div>
     </nav>
   );

@@ -1,0 +1,86 @@
+"use client";
+
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+
+export interface TurnstileHandle {
+  reset: () => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          "expired-callback"?: () => void;
+          "error-callback"?: () => void;
+          size?: "normal" | "compact" | "invisible";
+        }
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
+
+const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+
+function loadTurnstileScript(): Promise<void> {
+  if (window.turnstile) return Promise.resolve();
+  const existing = document.querySelector(`script[src="${SCRIPT_SRC}"]`);
+  if (existing) {
+    return new Promise((resolve) => existing.addEventListener("load", () => resolve()));
+  }
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = SCRIPT_SRC;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    document.head.appendChild(script);
+  });
+}
+
+const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) => void }>(function Turnstile(
+  { onToken },
+  ref
+) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    reset() {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+    },
+  }));
+
+  useEffect(() => {
+    let cancelled = false;
+    const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!sitekey) return;
+
+    loadTurnstileScript().then(() => {
+      if (cancelled || !containerRef.current || !window.turnstile) return;
+      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+        sitekey,
+        size: "invisible",
+        callback: onToken,
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+      }
+    };
+  }, [onToken]);
+
+  return <div ref={containerRef} />;
+});
+
+export default Turnstile;

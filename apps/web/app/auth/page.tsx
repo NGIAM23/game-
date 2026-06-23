@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import Logo from "@/components/Logo";
+import Turnstile, { type TurnstileHandle } from "@/components/Turnstile";
 
 export default function AuthPage() {
   const router = useRouter();
   const [checkingSession, setCheckingSession] = useState(true);
   const [busy, setBusy] = useState<"id" | "google" | "apple" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   useEffect(() => {
     async function check() {
@@ -25,10 +28,18 @@ export default function AuthPage() {
   }, [router]);
 
   async function createLuavioId() {
+    if (!captchaToken) {
+      setError("Vérification anti-robot en cours, réessaie dans une seconde.");
+      return;
+    }
     setBusy("id");
     setError(null);
-    const { data, error: signInError } = await supabase.auth.signInAnonymously();
+    const { data, error: signInError } = await supabase.auth.signInAnonymously({
+      options: { captchaToken },
+    });
     setBusy(null);
+    setCaptchaToken(null);
+    turnstileRef.current?.reset();
     if (signInError) {
       setError("Impossible de créer ton Luavio ID, réessaie.");
       return;
@@ -107,6 +118,8 @@ export default function AuthPage() {
             🍎 {busy === "apple" ? "..." : "Continuer avec Apple"}
           </button>
         </div>
+
+        <Turnstile ref={turnstileRef} onToken={setCaptchaToken} />
 
         {error && <p className="text-sm text-center mt-4 text-cat-corps">{error}</p>}
 

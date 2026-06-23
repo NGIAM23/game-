@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { NAV_TABS } from "@/lib/navTabs";
 import Logo from "./Logo";
@@ -21,7 +21,6 @@ interface MiniProfile {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [profile, setProfile] = useState<MiniProfile | null>(null);
 
   useEffect(() => {
@@ -37,11 +36,6 @@ export default function Sidebar() {
     }
     load();
   }, [pathname]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/auth");
-  }
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r-[3px] border-outline bg-surface px-5 py-7">
@@ -122,14 +116,6 @@ export default function Sidebar() {
           </Link>
         )}
       </nav>
-
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 border-transparent opacity-50 hover:opacity-100 hover:bg-background transition"
-      >
-        <NavIcon id="logout" size={20} />
-        Quitter
-      </button>
 
       <div className="flex items-center gap-2 px-3.5 pt-2 font-mono text-[10px] uppercase tracking-widest opacity-40">
         <Link href="/cgu" className="hover:opacity-100 transition">
