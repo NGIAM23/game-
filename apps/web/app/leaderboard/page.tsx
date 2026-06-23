@@ -9,12 +9,11 @@ import {
   RANK_TIERS,
   tierForLevel,
   subTierForLevel,
-  TIER_COLORS,
-  TIER_ABBR,
 } from "@luavio/shared";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
+import RankBadge from "@/components/RankBadge";
 
 interface Row {
   pseudo: string;
@@ -244,10 +243,10 @@ function RankTab({ totalXp }: { totalXp: number }) {
             initial={{ rotate: -8, scale: 0.8 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ duration: 0.5, type: "spring" }}
-            className="w-20 h-20 rounded-full mx-auto mb-3 border-[3px] border-outline flex items-center justify-center font-heading text-2xl text-outline shadow-[0_4px_0_0_#1A1A2E]"
+            className="w-20 h-20 rounded-full mx-auto mb-3 border-[3px] border-outline flex items-center justify-center shadow-[0_4px_0_0_#1A1A2E]"
             style={{ backgroundColor: "#FFD43B" }}
           >
-            {TIER_ABBR[currentTier.name]}
+            <RankBadge tier={currentTier.name} size={48} />
           </motion.div>
           <div className="font-heading text-2xl mb-1">{rank}</div>
           <div className="font-mono text-xs uppercase tracking-widest opacity-85 mb-3">
@@ -286,11 +285,8 @@ function RankTab({ totalXp }: { totalXp: number }) {
               } ${!isCurrent && !isPast ? "opacity-40" : ""}`}
               style={isCurrent ? { backgroundColor: "#FFD43B" } : undefined}
             >
-              <div
-                className="w-9 h-9 rounded-lg border-2 border-outline flex items-center justify-center font-heading text-xs text-white flex-shrink-0"
-                style={{ backgroundColor: TIER_COLORS[tier.name] }}
-              >
-                {TIER_ABBR[tier.name]}
+              <div className="w-9 h-9 flex-shrink-0">
+                <RankBadge tier={tier.name} size={36} />
               </div>
               <div className="flex-1">
                 <div className="font-heading text-sm leading-none mb-0.5">{tier.name} I → IV</div>
