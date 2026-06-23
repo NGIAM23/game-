@@ -3,16 +3,30 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { CATEGORIES, categoryColors } from "@luavio/shared";
-import CategoryIcon from "@/components/CategoryIcon";
+
+const TIPS = [
+  "💡 Ajoute une photo preuve sur une tâche pour gagner +15% XP en plus.",
+  "🔥 Complète une tâche chaque jour pour faire grimper ta série.",
+  "⚡ Le dimanche, toutes les tâches rapportent le double d'XP.",
+  "🏆 Grimpe dans le classement pour débloquer de nouveaux rangs.",
+  "🎨 Dépense tes Sparks pour personnaliser ton avatar dans la boutique.",
+  "🤝 Ajoute des amis pour vous motiver mutuellement chaque semaine.",
+];
 
 function LaunchScreen() {
+  const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setTipIndex((i) => (i + 1) % TIPS.length), 1400);
+    return () => clearInterval(t);
+  }, []);
+
   return (
     <motion.div
       key="launch"
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background px-6"
     >
       <motion.div
         animate={{ scale: [1, 1.08, 1], rotate: [-2, 2, -2] }}
@@ -22,13 +36,27 @@ function LaunchScreen() {
       >
         luav<span className="text-secondary">i</span>o
       </motion.div>
-      <div className="w-40 h-2.5 rounded-full bg-surface border-2 border-outline overflow-hidden">
+      <div className="w-40 h-2.5 rounded-full bg-surface border-2 border-outline overflow-hidden mb-5">
         <motion.div
           initial={{ x: "-100%" }}
           animate={{ x: "100%" }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
           className="w-1/2 h-full bg-secondary"
         />
+      </div>
+      <div className="h-10 max-w-sm text-center overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={tipIndex}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.35 }}
+            className="font-body text-sm opacity-70"
+          >
+            {TIPS[tipIndex]}
+          </motion.p>
+        </AnimatePresence>
       </div>
       <p className="font-mono text-[11px] uppercase tracking-widest opacity-50 mt-4">Chargement...</p>
     </motion.div>
@@ -39,7 +67,7 @@ export default function Home() {
   const [launching, setLaunching] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setLaunching(false), 900);
+    const t = setTimeout(() => setLaunching(false), 4200);
     return () => clearTimeout(t);
   }, []);
 
@@ -65,25 +93,6 @@ export default function Home() {
           </p>
           <p className="font-heading text-secondary mt-3 text-xl">Devenir meilleur, pour de vrai.</p>
         </motion.header>
-
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-14">
-          {CATEGORIES.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.06 * i }}
-              whileHover={{ y: -3 }}
-              className="rounded-sticker border-2 border-outline p-4 text-center font-body shadow-[0_4px_0_0_#1A1A2E]"
-              style={{ backgroundColor: categoryColors[cat.id] }}
-            >
-              <div className="flex justify-center mb-1">
-                <CategoryIcon id={cat.id} size={28} />
-              </div>
-              <div className="font-heading text-sm">{cat.label}</div>
-            </motion.div>
-          ))}
-        </section>
 
         <motion.section
           initial={{ opacity: 0, scale: 0.95 }}
