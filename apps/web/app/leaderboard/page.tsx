@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { levelFromTotalXp, rankFromLevel, isSunday } from "@luavio/shared";
+import {
+  levelFromTotalXp,
+  rankFromLevel,
+  isSunday,
+  RANK_TIERS,
+  tierForLevel,
+  subTierForLevel,
+  TIER_COLORS,
+  TIER_ABBR,
+} from "@luavio/shared";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
@@ -20,12 +29,13 @@ interface SundayRow {
 }
 
 const PODIUM_BG = ["#FFD43B", "#E8E8E8", "#F4B98A"];
-const TABS = ["Global", "Dimanche", "Amis"];
+const TABS = ["Global", "Dimanche", "Amis", "Mon rang"];
 
 export default function Leaderboard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [sundayRows, setSundayRows] = useState<SundayRow[]>([]);
   const [friendRows, setFriendRows] = useState<Row[]>([]);
+  const [myTotalXp, setMyTotalXp] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
@@ -35,9 +45,10 @@ export default function Leaderboard() {
     async function load() {
       const { data: session } = await supabase.auth.getSession();
       const { data: myProfile } = session.session
-        ? await supabase.from("profiles").select("pseudo").eq("id", session.session.user.id).single()
+        ? await supabase.from("profiles").select("pseudo, total_xp").eq("id", session.session.user.id).single()
         : { data: null };
       setMe(myProfile?.pseudo ?? null);
+      setMyTotalXp(myProfile?.total_xp ?? 0);
 
       const { data, error: fetchError } = await supabase
         .from("profiles")
@@ -110,15 +121,19 @@ export default function Leaderboard() {
         ))}
       </div>
 
-      <div className="bg-secondary text-white border-[3px] border-outline rounded-sticker px-4 py-3 mb-6 shadow-[0_4px_0_0_#1A1A2E] flex items-center gap-3 max-w-2xl mx-auto">
-        <span className="text-2xl">🏆</span>
-        <div className="text-xs leading-snug font-semibold">
-          <strong className="font-heading text-sm block mb-0.5">TOP 10 DIMANCHE</strong>
-          Cosmétiques · ⚡ Sparks · pass gratuits pour le top 10
+      {tab !== "Mon rang" && (
+        <div className="bg-secondary text-white border-[3px] border-outline rounded-sticker px-4 py-3 mb-6 shadow-[0_4px_0_0_#1A1A2E] flex items-center gap-3 max-w-2xl mx-auto">
+          <span className="text-2xl">🏆</span>
+          <div className="text-xs leading-snug font-semibold">
+            <strong className="font-heading text-sm block mb-0.5">TOP 10 DIMANCHE</strong>
+            Cosmétiques · ⚡ Sparks · pass gratuits pour le top 10
+          </div>
         </div>
-      </div>
+      )}
 
-      {loading ? (
+      {tab === "Mon rang" ? (
+        <RankTab totalXp={myTotalXp} />
+      ) : loading ? (
         <p className="text-center font-heading">Chargement...</p>
       ) : error ? (
         <p className="text-center">{error}</p>
@@ -203,5 +218,97 @@ function PodiumSpot({
       <div className="font-heading text-xs truncate px-1 max-w-full">@{row.pseudo}</div>
       <div className="font-mono text-[10px] font-bold">Niv. {level}</div>
     </motion.div>
+  );
+}
+
+function RankTab({ totalXp }: { totalXp: number }) {
+  const { level, xpIntoLevel, xpForNextLevel } = levelFromTotalXp(totalXp);
+  const rank = rankFromLevel(level);
+  const currentTier = tierForLevel(level);
+  const pct = Math.min(100, Math.round((xpIntoLevel / xpForNextLevel) * 100));
+
+  return (
+    <div className="grid lg:grid-cols-[1fr_1.4fr] gap-6 items-start">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="relative overflow-hidden bg-secondary border-[3px] border-outline rounded-sticker p-6 lg:p-8 text-center text-white shadow-[0_5px_0_0_#1A1A2E] lg:sticky lg:top-12"
+      >
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(circle at 50% 100%, rgba(255,212,59,0.4), transparent 60%)" }}
+        />
+        <div className="relative">
+          <motion.div
+            initial={{ rotate: -8, scale: 0.8 }}
+            animate={{ rotate: 0, scale: 1 }}
+            transition={{ duration: 0.5, type: "spring" }}
+            className="w-20 h-20 rounded-full mx-auto mb-3 border-[3px] border-outline flex items-center justify-center font-heading text-2xl text-outline shadow-[0_4px_0_0_#1A1A2E]"
+            style={{ backgroundColor: "#FFD43B" }}
+          >
+            {TIER_ABBR[currentTier.name]}
+          </motion.div>
+          <div className="font-heading text-2xl mb-1">{rank}</div>
+          <div className="font-mono text-xs uppercase tracking-widest opacity-85 mb-3">
+            Niveau {level} · {totalXp} XP
+          </div>
+          <div className="h-3 bg-black/30 border-2 border-outline rounded-full overflow-hidden mb-2">
+            <motion.div
+              className="h-full bg-primary border-r-2 border-outline"
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            />
+          </div>
+          <div className="font-mono text-[11px] flex justify-between opacity-90">
+            <span>{rank}</span>
+            <span>
+              <strong className="text-primary">{xpIntoLevel}</strong> / {xpForNextLevel} XP
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="flex flex-col gap-1.5">
+        {RANK_TIERS.map((tier, i) => {
+          const isCurrent = tier.name === currentTier.name;
+          const isPast = level > tier.maxLevel;
+          const sub = isCurrent ? subTierForLevel(level, tier) : null;
+          return (
+            <motion.div
+              key={tier.name}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.03 }}
+              className={`flex items-center gap-3 p-2.5 bg-surface border-2 border-outline rounded-sticker ${
+                isCurrent ? "shadow-[0_4px_0_0_#1A1A2E] border-[3px]" : "shadow-[0_2px_0_0_#1A1A2E]"
+              } ${!isCurrent && !isPast ? "opacity-40" : ""}`}
+              style={isCurrent ? { backgroundColor: "#FFD43B" } : undefined}
+            >
+              <div
+                className="w-9 h-9 rounded-lg border-2 border-outline flex items-center justify-center font-heading text-xs text-white flex-shrink-0"
+                style={{ backgroundColor: TIER_COLORS[tier.name] }}
+              >
+                {TIER_ABBR[tier.name]}
+              </div>
+              <div className="flex-1">
+                <div className="font-heading text-sm leading-none mb-0.5">{tier.name} I → IV</div>
+                <div className="font-mono text-[10px] opacity-60">
+                  Niv. {tier.minLevel}-{tier.maxLevel === Infinity ? "+" : tier.maxLevel}
+                </div>
+              </div>
+              <div
+                className={`font-mono text-[10px] font-semibold px-2 py-1 rounded-full border ${
+                  isCurrent ? "bg-secondary text-white border-secondary" : "bg-background border-outline"
+                }`}
+              >
+                {isCurrent ? `EN COURS · ${sub}` : isPast ? "✓ Acquis" : "À venir"}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

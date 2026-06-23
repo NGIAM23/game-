@@ -1,12 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { levelFromTotalXp, rankFromLevel, CATEGORIES, categoryColors } from "@luavio/shared";
+import { levelFromTotalXp, rankFromLevel, randomAvatarSeed, CATEGORIES, categoryColors } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
+import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
+
+function seedFromPhoto(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const size = 8;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("no canvas context");
+        ctx.drawImage(img, 0, 0, size, size);
+        const { data } = ctx.getImageData(0, 0, size, size);
+        let hash = 0;
+        for (let i = 0; i < data.length; i++) {
+          hash = (hash * 31 + data[i]) | 0;
+        }
+        resolve(Math.abs(hash).toString(36));
+      } catch (e) {
+        reject(e);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("invalid image"));
+    };
+    img.src = url;
+  });
+}
 
 interface ProfileData {
   pseudo: string;
@@ -27,6 +61,13 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
+  const [soundOn, setSoundOn] = useState(true);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const photoInput = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+  }, []);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -75,6 +116,20 @@ export default function ProfilePage() {
       setProfile({ ...profile, pseudo: pseudoInput.trim(), avatar_seed: seedInput.trim() });
       setNotice("Profil mis à jour !");
     }
+  }
+
+  async function handlePhotoToAvatar(file: File | undefined) {
+    if (!file) return;
+    setPhotoBusy(true);
+    setNotice(null);
+    try {
+      const seed = await seedFromPhoto(file);
+      setSeedInput(seed);
+      setNotice("Avatar généré à partir de ta photo — la photo n'a pas été envoyée ni enregistrée, tout reste sur ton appareil.");
+    } catch {
+      setNotice("Impossible de lire cette photo, réessaie avec une autre.");
+    }
+    setPhotoBusy(false);
   }
 
   if (loading || !profile)
@@ -126,6 +181,35 @@ export default function ProfilePage() {
           onChange={(e) => setSeedInput(e.target.value)}
           className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
         />
+
+        <div className="flex items-center gap-2 mb-3">
+          <Avatar seed={seedInput || profile.pseudo} size={48} />
+          <button
+            onClick={() => setSeedInput(randomAvatarSeed())}
+            className="flex-1 font-heading text-xs bg-background border-2 border-outline rounded-sticker py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+          >
+            🎲 Avatar aléatoire
+          </button>
+          <input
+            ref={photoInput}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handlePhotoToAvatar(e.target.files?.[0])}
+          />
+          <button
+            onClick={() => photoInput.current?.click()}
+            disabled={photoBusy}
+            className="flex-1 font-heading text-xs bg-background border-2 border-outline rounded-sticker py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+          >
+            {photoBusy ? "..." : "📷 Depuis une photo"}
+          </button>
+        </div>
+        <p className="font-mono text-[10px] opacity-50 leading-snug mb-3">
+          🔒 Ta photo est traitée uniquement sur ton appareil pour générer un avatar : elle n'est jamais envoyée ni stockée
+          par luavio.
+        </p>
+
         <button
           onClick={save}
           disabled={saving}
@@ -134,6 +218,24 @@ export default function ProfilePage() {
           {saving ? "..." : "Enregistrer"}
         </button>
         {notice && <p className="text-xs text-center mt-2 font-body font-semibold">{notice}</p>}
+      </div>
+
+      <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] flex items-center justify-between">
+        <div>
+          <h2 className="font-heading text-base">🔊 Son</h2>
+          <p className="font-mono text-[10px] opacity-50">Active ou coupe les sons de l'app.</p>
+        </div>
+        <button
+          onClick={() => {
+            const next = !soundOn;
+            setSoundOn(next);
+            setSoundEnabled(next);
+            if (next) playClick();
+          }}
+          className="font-heading text-sm bg-background border-2 border-outline rounded-sticker px-4 py-2 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+        >
+          {soundOn ? "🔊 Activé" : "🔇 Coupé"}
+        </button>
       </div>
 
       <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E]">

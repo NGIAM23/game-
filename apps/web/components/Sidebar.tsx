@@ -4,20 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
+import { NAV_TABS } from "@/lib/navTabs";
 import Logo from "./Logo";
 import Avatar from "./Avatar";
 import NotificationBell from "./NotificationBell";
 
-const TABS = [
-  { href: "/dashboard", label: "Accueil", icon: "🏠" },
-  { href: "/tasks", label: "Tâches", icon: "🎯" },
-  { href: "/rank", label: "Mon rang", icon: "🏅" },
-  { href: "/leaderboard", label: "Classement", icon: "🏆" },
-  { href: "/friends", label: "Amis", icon: "👥" },
-  { href: "/shop", label: "luavio+", icon: "✨" },
-  { href: "/profile", label: "Mon profil", icon: "🙋" },
-];
+const TABS = NAV_TABS;
 
 interface MiniProfile {
   pseudo: string | null;
@@ -30,11 +22,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<MiniProfile | null>(null);
-  const [soundOn, setSoundOn] = useState(true);
-
-  useEffect(() => {
-    setSoundOn(isSoundEnabled());
-  }, []);
 
   useEffect(() => {
     async function load() {
@@ -64,7 +51,7 @@ export default function Sidebar() {
 
       {profile?.pseudo && (
         <Link
-          href={`/u/${profile.pseudo}`}
+          href="/profile"
           className="flex items-center gap-2.5 mb-8 bg-background border-2 border-outline rounded-sticker p-2.5"
         >
           <Avatar seed={profile.avatar_seed || profile.pseudo} size={36} />
@@ -107,19 +94,6 @@ export default function Sidebar() {
           </Link>
         )}
       </nav>
-
-      <button
-        onClick={() => {
-          const next = !soundOn;
-          setSoundOn(next);
-          setSoundEnabled(next);
-          if (next) playClick();
-        }}
-        className="flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 border-transparent opacity-50 hover:opacity-100 hover:bg-background transition"
-      >
-        <span className="text-lg">{soundOn ? "🔊" : "🔇"}</span>
-        {soundOn ? "Son activé" : "Son coupé"}
-      </button>
 
       <button
         onClick={handleLogout}
