@@ -20,6 +20,10 @@ interface DuelRow {
   opponent_lng: number | null;
   meeting_lat: number | null;
   meeting_lng: number | null;
+  meeting_candidates: { label: string; lat: number; lng: number; distance: number }[] | null;
+  chosen_lat: number | null;
+  chosen_lng: number | null;
+  chosen_label: string | null;
   challenger_ready: boolean;
   opponent_ready: boolean;
   started_at: string | null;
@@ -36,6 +40,13 @@ interface MissionRow {
 interface MiniProfile {
   pseudo: string;
   avatar_seed: string | null;
+}
+
+interface MeetingCandidate {
+  label: string;
+  lat: number;
+  lng: number;
+  distance: number;
 }
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -83,7 +94,9 @@ export default function DuelPage() {
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [burst, setBurst] = useState<number | null>(null);
+  const [choosingSpot, setChoosingSpot] = useState(false);
   const finishingRef = useRef(false);
+  const candidatesFetchedRef = useRef(false);
 
   const load = useCallback(async () => {
     const { data: session } = await supabase.auth.getSession();
@@ -180,6 +193,20 @@ export default function DuelPage() {
     setBusy(false);
   }
 
+  async function chooseSpot(c: MeetingCandidate) {
+    setChoosingSpot(true);
+    setError(null);
+    const { error: rpcError } = await supabase.rpc("choose_duel_meeting_spot", {
+      p_duel_id: duelId,
+      p_lat: c.lat,
+      p_lng: c.lng,
+      p_label: c.label,
+    });
+    setChoosingSpot(false);
+    if (rpcError) setError("Impossible de choisir ce lieu, réessaie.");
+    else load();
+  }
+
   async function confirmArrival() {
     setBusy(true);
     setError(null);
@@ -204,6 +231,31 @@ export default function DuelPage() {
     await supabase.rpc("complete_duel_mission", { p_duel_id: duelId, p_mission_id: missionId });
     load();
   }
+
+  useEffect(() => {
+    if (!duel || duel.status !== "meeting") return;
+    if (duel.meeting_lat === null || duel.meeting_lng === null) return;
+    if (duel.meeting_candidates !== null) return;
+    if (candidatesFetchedRef.current) return;
+    candidatesFetchedRef.current = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/duel/meeting-spots", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat: duel.meeting_lat, lng: duel.meeting_lng }),
+        });
+        const data = await res.json();
+        await supabase.rpc("set_duel_meeting_candidates", {
+          p_duel_id: duelId,
+          p_candidates: data.candidates ?? [],
+        });
+      } catch {
+        await supabase.rpc("set_duel_meeting_candidates", { p_duel_id: duelId, p_candidates: [] });
+      }
+      load();
+    })();
+  }, [duel, duelId, load]);
 
   useEffect(() => {
     if (!duel || duel.status !== "active" || !duel.ends_at) return;
@@ -235,11 +287,12 @@ export default function DuelPage() {
   const myLocSubmitted = isChallenger ? duel.challenger_lat !== null : duel.opponent_lat !== null;
   const myLat = isChallenger ? duel.challenger_lat : duel.opponent_lat;
   const myLng = isChallenger ? duel.challenger_lng : duel.opponent_lng;
-  const meetingLat = duel.meeting_lat;
-  const meetingLng = duel.meeting_lng;
-  const hasPositions = myLat !== null && myLng !== null && meetingLat !== null && meetingLng !== null;
-  const myMeters = hasPositions ? haversineMeters(myLat as number, myLng as number, meetingLat as number, meetingLng as number) : null;
-  const myBearing = hasPositions ? bearingDeg(myLat as number, myLng as number, meetingLat as number, meetingLng as number) : 0;
+  const chosenLat = duel.chosen_lat;
+  const chosenLng = duel.chosen_lng;
+  const hasPositions = myLat !== null && myLng !== null && chosenLat !== null && chosenLng !== null;
+  const myMeters = hasPositions ? haversineMeters(myLat as number, myLng as number, chosenLat as number, chosenLng as number) : null;
+  const myBearing = hasPositions ? bearingDeg(myLat as number, myLng as number, chosenLat as number, chosenLng as number) : 0;
+  const candidates = (duel.meeting_candidates ?? []) as MeetingCandidate[];
 
   const remainingMs = duel.ends_at ? Math.max(0, new Date(duel.ends_at).getTime() - now) : 0;
   const remainingMin = Math.floor(remainingMs / 60000);
@@ -298,7 +351,7 @@ export default function DuelPage() {
           {!myLocSubmitted ? (
             <>
               <p className="font-mono text-[11px] opacity-50 mb-4">
-                Partage ta position pour trouver un point de rendez-vous équidistant avec ton ami.
+                Partage ta position pour trouver des lieux de rendez-vous proches de vous deux.
               </p>
               <button
                 onClick={submitLocation}
@@ -310,8 +363,34 @@ export default function DuelPage() {
             </>
           ) : duel.meeting_lat === null ? (
             <p className="font-body text-sm opacity-70">En attente de la position de @{opp?.pseudo}...</p>
+          ) : duel.chosen_lat === null ? (
+            <>
+              <p className="font-mono text-[11px] opacity-50 mb-4">
+                Choisissez ensemble un lieu public connu et sûr pour vous retrouver. Le premier choix validé compte pour les deux.
+              </p>
+              {duel.meeting_candidates === null ? (
+                <p className="font-body text-sm opacity-70">Recherche de lieux à proximité...</p>
+              ) : candidates.length === 0 ? (
+                <p className="font-body text-sm opacity-70">Aucun lieu trouvé près de vous, réessaie plus tard.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {candidates.map((c) => (
+                    <button
+                      key={c.label + c.lat}
+                      onClick={() => chooseSpot(c)}
+                      disabled={choosingSpot}
+                      className="flex items-center justify-between border-2 border-outline rounded-sticker px-4 py-3 font-body text-sm bg-white shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+                    >
+                      <span>📍 {c.label}</span>
+                      <span className="font-mono text-[10px] opacity-50">{Math.round(c.distance)} m</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <>
+              <p className="font-heading text-sm mb-2">📍 {duel.chosen_label}</p>
               <div className="relative w-48 h-48 mx-auto mb-4 rounded-full border-[3px] border-outline bg-background overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div
@@ -331,7 +410,7 @@ export default function DuelPage() {
                 </div>
               </div>
               <p className="font-heading text-sm mb-1">{myMeters !== null ? `${Math.round(myMeters)} m du point de RDV` : "..."}</p>
-              <p className="font-mono text-[10px] opacity-50 mb-4">Rejoins le point central (adresse approximative acceptée, ~150m).</p>
+              <p className="font-mono text-[10px] opacity-50 mb-4">Rejoins ce lieu (adresse approximative acceptée, ~150m).</p>
               <button
                 onClick={confirmArrival}
                 disabled={busy || !!myReady}
