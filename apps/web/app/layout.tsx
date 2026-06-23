@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lilita_One, Fredoka, DM_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const lilita = Lilita_One({ subsets: ["latin"], weight: "400", variable: "--font-lilita" });
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className={`${lilita.variable} ${fredoka.variable} ${dmMono.variable} font-body`}>{children}</body>
+      <body className={`${lilita.variable} ${fredoka.variable} ${dmMono.variable} font-body`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
