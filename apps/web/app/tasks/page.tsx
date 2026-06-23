@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { CATEGORIES, categoryColors, isSunday, levelFromTotalXp, type CategoryId } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import SundayBanner from "@/components/SundayBanner";
+import CategoryIcon from "@/components/CategoryIcon";
 import { playTaskComplete, playLevelUp } from "@/lib/sound";
 
 type Location = "home" | "outside" | "any";
@@ -215,10 +216,10 @@ export default function TasksPage() {
         style={{ backgroundColor: isDone ? "#F0EAD2" : "#FFFFFF" }}
       >
         <span
-          className="w-11 h-11 rounded-xl border-2 border-outline flex items-center justify-center text-xl flex-shrink-0"
+          className="w-11 h-11 rounded-xl border-2 border-outline flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: categoryColors[task.category] }}
         >
-          {category.icon}
+          <CategoryIcon id={task.category} size={24} />
         </span>
         <button
           disabled={isDone || pending === task.id}

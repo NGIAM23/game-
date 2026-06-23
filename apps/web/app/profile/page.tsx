@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { levelFromTotalXp, rankFromLevel, randomAvatarSeed, CATEGORIES, categoryColors } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
+import CategoryIcon from "@/components/CategoryIcon";
 import { isSoundEnabled, setSoundEnabled, playClick } from "@/lib/sound";
 
 function seedFromPhoto(file: File): Promise<string> {
@@ -250,7 +251,9 @@ export default function ProfilePage() {
                 className="border-2 border-outline rounded-lg p-2 text-center"
                 style={{ backgroundColor: categoryColors[cat.id] }}
               >
-                <div className="text-lg">{cat.icon}</div>
+                <div className="flex justify-center mb-0.5">
+                  <CategoryIcon id={cat.id} size={20} />
+                </div>
                 <div className="font-heading text-[11px]">{pct}%</div>
               </div>
             );

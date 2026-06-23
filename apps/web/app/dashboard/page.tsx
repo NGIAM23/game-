@@ -8,6 +8,7 @@ import { levelFromTotalXp, rankFromLevel, CATEGORIES, categoryColors, type Categ
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import SundayBanner from "@/components/SundayBanner";
+import CategoryIcon from "@/components/CategoryIcon";
 
 interface Profile {
   id: string;
@@ -214,10 +215,10 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-2.5 mb-2">
                     <span
-                      className="w-9 h-9 rounded-lg border-2 border-outline flex items-center justify-center text-lg flex-shrink-0"
+                      className="w-9 h-9 rounded-lg border-2 border-outline flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: categoryColors[cat.id as CategoryId] }}
                     >
-                      {cat.icon}
+                      <CategoryIcon id={cat.id as CategoryId} size={20} />
                     </span>
                     <span className="font-body font-semibold text-xs flex-1">{cat.label}</span>
                     <span className="font-heading text-xs">{pct}%</span>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { CATEGORIES, categoryColors } from "@luavio/shared";
+import CategoryIcon from "@/components/CategoryIcon";
 
 function LaunchScreen() {
   return (
@@ -76,7 +77,9 @@ export default function Home() {
               className="rounded-sticker border-2 border-outline p-4 text-center font-body shadow-[0_4px_0_0_#1A1A2E]"
               style={{ backgroundColor: categoryColors[cat.id] }}
             >
-              <div className="text-2xl mb-1">{cat.icon}</div>
+              <div className="flex justify-center mb-1">
+                <CategoryIcon id={cat.id} size={28} />
+              </div>
               <div className="font-heading text-sm">{cat.label}</div>
             </motion.div>
           ))}
