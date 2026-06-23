@@ -25,9 +25,82 @@ const SAFE_TAGS = [
   `amenity=townhall`,
   `amenity=community_centre`,
   `amenity=marketplace`,
+  `amenity=pharmacy`,
+  `amenity=fast_food`,
   `leisure=park`,
   `shop=mall`,
+  `shop=supermarket`,
 ];
+
+// Plusieurs miroirs Overpass : si l'un est inaccessible ou saturé, on tente le suivant.
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
+];
+
+async function fetchCandidates(lat: number, lng: number, radius: number): Promise<Candidate[]> {
+  const filters = SAFE_TAGS.map(
+    (tag) => `nwr[${tag}](around:${radius},${lat},${lng});`
+  ).join("\n");
+  const query = `[out:json][timeout:15];(${filters});out center 30;`;
+
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain",
+          "User-Agent": "Luavio/1.0 (duel meeting spot finder)",
+        },
+        body: query,
+        cache: "no-store",
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const elements = (data.elements ?? []) as {
+        lat?: number;
+        lon?: number;
+        center?: { lat: number; lon: number };
+        tags?: Record<string, string>;
+      }[];
+
+      const candidates: Candidate[] = elements
+        .filter((e) => e.tags?.name)
+        .map((e) => {
+          const elat = e.lat ?? e.center?.lat;
+          const elng = e.lon ?? e.center?.lon;
+          return elat !== undefined && elng !== undefined
+            ? { label: e.tags!.name, lat: elat, lng: elng, distance: haversineMeters(lat, lng, elat, elng) }
+            : null;
+        })
+        .filter((c): c is Candidate => c !== null)
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 5);
+
+      if (candidates.length > 0) return candidates;
+    } catch {
+      continue;
+    }
+  }
+  return [];
+}
+
+// Petits décalages (en degrés) autour du centre si aucun lieu nommé n'est trouvé,
+// pour ne jamais bloquer le duel.
+function fallbackCandidates(lat: number, lng: number): Candidate[] {
+  const offsets = [
+    { label: "Point de rendez-vous Nord", dLat: 0.0015, dLng: 0 },
+    { label: "Point de rendez-vous Sud", dLat: -0.0015, dLng: 0 },
+    { label: "Point de rendez-vous Est", dLat: 0, dLng: 0.0015 },
+    { label: "Point de rendez-vous Ouest", dLat: 0, dLng: -0.0015 },
+  ];
+  return offsets.map((o) => {
+    const clat = lat + o.dLat;
+    const clng = lng + o.dLng;
+    return { label: o.label, lat: clat, lng: clng, distance: haversineMeters(lat, lng, clat, clng) };
+  });
+}
 
 export async function POST(req: NextRequest) {
   const { lat, lng } = await req.json();
@@ -35,34 +108,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
   }
 
-  try {
-    const radius = 1500;
-    const filters = SAFE_TAGS.map((tag) => `node[${tag}](around:${radius},${lat},${lng});`).join("\n");
-    const query = `[out:json][timeout:10];(${filters});out center 20;`;
+  let candidates = await fetchCandidates(lat, lng, 1500);
+  if (candidates.length === 0) candidates = await fetchCandidates(lat, lng, 4000);
+  if (candidates.length === 0) candidates = fallbackCandidates(lat, lng);
 
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: query,
-    });
-
-    if (!res.ok) throw new Error("Overpass error");
-    const data = await res.json();
-
-    const elements = (data.elements ?? []) as { lat: number; lon: number; tags?: Record<string, string> }[];
-    const candidates: Candidate[] = elements
-      .filter((e) => e.tags?.name)
-      .map((e) => ({
-        label: e.tags!.name,
-        lat: e.lat,
-        lng: e.lon,
-        distance: haversineMeters(lat, lng, e.lat, e.lon),
-      }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5);
-
-    return NextResponse.json({ candidates });
-  } catch {
-    return NextResponse.json({ candidates: [] }, { status: 200 });
-  }
+  return NextResponse.json({ candidates });
 }
