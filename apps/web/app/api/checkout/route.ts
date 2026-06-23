@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
               currency: "eur",
               unit_amount: PLUS_PRICE_CENTS,
               recurring: { interval: "month" },
-              product_data: { name: "luavio+" },
+              product_data: { name: "Luavio+" },
             },
             quantity: 1,
           },

@@ -103,7 +103,7 @@ export default function Dashboard() {
   return (
     <Shell wide>
       <div className="flex items-center gap-3 mb-1">
-        <Avatar seed={profile.avatar_seed || profile.pseudo || "luavio"} size={44} />
+        <Avatar seed={profile.avatar_seed || profile.pseudo || "Luavio"} size={44} />
         <div>
           <div className="font-heading text-2xl lg:text-3xl leading-none">
             Salut, <span className="text-secondary">{profile.pseudo}</span> 👋

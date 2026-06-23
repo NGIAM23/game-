@@ -73,7 +73,7 @@ function ShopContent() {
         });
         const result = await res.json();
         if (res.ok) {
-          setNotice(result.kind === "plus_subscription" ? "✨ luavio+ est activé !" : `⚡ +${result.sparksAwarded} Sparks crédités !`);
+          setNotice(result.kind === "plus_subscription" ? "✨ Luavio+ est activé !" : `⚡ +${result.sparksAwarded} Sparks crédités !`);
           await loadProfile(session.session.user.id);
         } else {
           setNotice("Le paiement a été reçu mais la confirmation a échoué — contacte le support.");
@@ -129,7 +129,7 @@ function ShopContent() {
   return (
     <Shell>
       <h1 className="font-heading text-3xl text-center mb-1">
-        luavio<span className="text-secondary">+</span>
+        Luavio<span className="text-secondary">+</span>
       </h1>
       <p className="font-mono text-xs uppercase tracking-widest opacity-50 text-center mb-6">
         Paiement sécurisé par Stripe
@@ -153,7 +153,7 @@ function ShopContent() {
         className="bg-secondary text-white border-[3px] border-outline rounded-sticker p-6 shadow-[0_5px_0_0_#1A1A2E] mb-8"
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="font-heading text-xl">luavio+</span>
+          <span className="font-heading text-xl">Luavio+</span>
           {profile.is_plus && (
             <span className="font-heading text-xs bg-primary text-outline border-2 border-outline rounded-full px-3 py-1">
               ✓ Actif
@@ -178,7 +178,7 @@ function ShopContent() {
             disabled={busy === "plus_subscription"}
             className="w-full font-heading bg-primary text-outline border-2 border-outline rounded-sticker py-3 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
           >
-            {busy === "plus_subscription" ? "Redirection..." : "✨ Activer luavio+"}
+            {busy === "plus_subscription" ? "Redirection..." : "✨ Activer Luavio+"}
           </button>
         )}
       </motion.div>

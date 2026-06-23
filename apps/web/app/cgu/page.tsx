@@ -11,7 +11,7 @@ export default function CguPage() {
           <h2 className="font-heading text-lg mb-2">1. Objet</h2>
           <p>
             Les présentes conditions générales d'utilisation (CGU) régissent l'accès et l'utilisation de l'application
-            luavio, accessible via le site web et/ou l'application mobile (ci-après « l'Application »). En créant un
+            Luavio, accessible via le site web et/ou l'application mobile (ci-après « l'Application »). En créant un
             compte, l'utilisateur accepte sans réserve les présentes CGU.
           </p>
         </section>
@@ -19,7 +19,7 @@ export default function CguPage() {
         <section>
           <h2 className="font-heading text-lg mb-2">2. Description du service</h2>
           <p>
-            luavio est une application de gamification de tâches personnelles permettant à l'utilisateur de suivre des
+            Luavio est une application de gamification de tâches personnelles permettant à l'utilisateur de suivre des
             défis quotidiens et hebdomadaires, de gagner de l'expérience (XP) et des Sparks (monnaie virtuelle interne),
             et d'accéder à des fonctionnalités sociales (classements, amis) et cosmétiques.
           </p>
@@ -37,9 +37,9 @@ export default function CguPage() {
         <section>
           <h2 className="font-heading text-lg mb-2">4. Achats et abonnements</h2>
           <p>
-            L'Application propose un abonnement payant (« luavio+ ») et des packs de monnaie virtuelle (« Sparks »)
+            L'Application propose un abonnement payant (« Luavio+ ») et des packs de monnaie virtuelle (« Sparks »)
             achetables via la plateforme de paiement Stripe. Les Sparks n'ont aucune valeur monétaire réelle, ne sont
-            pas remboursables et ne peuvent être échangés contre de l'argent. L'abonnement luavio+ est facturé
+            pas remboursables et ne peuvent être échangés contre de l'argent. L'abonnement Luavio+ est facturé
             mensuellement et peut être annulé à tout moment en contactant le support.
           </p>
         </section>
@@ -64,7 +64,7 @@ export default function CguPage() {
         <section>
           <h2 className="font-heading text-lg mb-2">7. Responsabilité</h2>
           <p>
-            luavio est un outil de motivation personnelle et ne constitue en aucun cas un avis médical, psychologique
+            Luavio est un outil de motivation personnelle et ne constitue en aucun cas un avis médical, psychologique
             ou professionnel. L'éditeur ne pourra être tenu responsable des conséquences de l'usage de l'Application.
           </p>
         </section>

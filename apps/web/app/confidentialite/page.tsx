@@ -10,8 +10,8 @@ export default function ConfidentialitePage() {
         <section>
           <h2 className="font-heading text-lg mb-2">1. Données collectées</h2>
           <p>
-            luavio collecte les données suivantes : adresse e-mail, pseudo, données de progression (XP, niveau, série de
-            jours, tâches complétées), données de paiement (gérées exclusivement par Stripe, luavio ne stocke aucune
+            Luavio collecte les données suivantes : adresse e-mail, pseudo, données de progression (XP, niveau, série de
+            jours, tâches complétées), données de paiement (gérées exclusivement par Stripe, Luavio ne stocke aucune
             donnée bancaire), et le cas échéant les photos soumises pour la vérification de preuves de tâches.
           </p>
         </section>
@@ -22,7 +22,7 @@ export default function ConfidentialitePage() {
             Les données sont utilisées pour fournir le service (suivi de progression, classement, fonctionnalités
             sociales), traiter les paiements, et améliorer l'Application. Les photos de vérification sont transmises de
             manière ponctuelle à un service d'intelligence artificielle tiers (Google Gemini) à des fins d'analyse
-            automatique et ne sont pas conservées par luavio au-delà du traitement immédiat.
+            automatique et ne sont pas conservées par Luavio au-delà du traitement immédiat.
           </p>
         </section>
 
@@ -30,7 +30,7 @@ export default function ConfidentialitePage() {
           <h2 className="font-heading text-lg mb-2">3. Partage des données</h2>
           <p>
             Les données de paiement sont traitées par Stripe Inc. conformément à sa propre politique de confidentialité.
-            Les photos de vérification sont traitées par Google (Gemini API). luavio ne vend ni ne partage les données
+            Les photos de vérification sont traitées par Google (Gemini API). Luavio ne vend ni ne partage les données
             personnelles à des fins publicitaires.
           </p>
         </section>

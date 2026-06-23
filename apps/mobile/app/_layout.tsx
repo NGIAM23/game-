@@ -10,7 +10,7 @@ export default function RootLayout() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "luavio — Tâches du jour" }} />
+      <Stack.Screen name="index" options={{ title: "Luavio — Tâches du jour" }} />
       <Stack.Screen name="profile" options={{ title: "Profil" }} />
       <Stack.Screen name="auth" options={{ title: "Connexion", headerShown: false }} />
     </Stack>

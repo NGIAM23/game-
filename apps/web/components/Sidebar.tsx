@@ -62,19 +62,35 @@ export default function Sidebar() {
         </Link>
       )}
 
-      <nav className="flex flex-col gap-1.5 flex-1">
+      <nav
+        className="flex flex-col gap-2 flex-1 p-2.5 rounded-sticker border-2 border-outline"
+        style={{ background: "linear-gradient(180deg, #3B2E63 0%, #2A2150 70%, #1A1A2E 100%)" }}
+      >
         {TABS.map((tab) => {
           const active = pathname === tab.href;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 transition ${
-                active
-                  ? "bg-primary border-outline shadow-[0_3px_0_0_#1A1A2E] translate-y-0"
-                  : "border-transparent opacity-60 hover:opacity-100 hover:bg-background"
-              }`}
+              className="relative flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 transition-transform"
+              style={{
+                background: active
+                  ? "linear-gradient(180deg, #FFE17D 0%, #FFD43B 55%, #E8A800 100%)"
+                  : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+                color: active ? "#1A1A2E" : "#FFF8E7",
+                borderColor: active ? "#1A1A2E" : "transparent",
+                boxShadow: active
+                  ? "0 3px 0 0 #1A1A2E, inset 0 2px 0 0 rgba(255,255,255,0.6)"
+                  : "inset 0 1px 0 0 rgba(255,255,255,0.08)",
+                opacity: active ? 1 : 0.75,
+              }}
             >
+              {active && (
+                <span
+                  className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2 border-outline"
+                  style={{ backgroundColor: "#6750E8" }}
+                />
+              )}
               <span className="text-lg">{tab.icon}</span>
               {tab.label}
             </Link>
@@ -83,11 +99,22 @@ export default function Sidebar() {
         {profile?.is_admin && (
           <Link
             href="/admin"
-            className={`flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 transition ${
+            className="flex items-center gap-3 font-heading text-sm px-3.5 py-3 rounded-sticker border-2 transition-transform"
+            style={
               pathname === "/admin"
-                ? "bg-primary border-outline shadow-[0_3px_0_0_#1A1A2E] translate-y-0"
-                : "border-transparent opacity-60 hover:opacity-100 hover:bg-background"
-            }`}
+                ? {
+                    background: "linear-gradient(180deg, #FFE17D 0%, #FFD43B 55%, #E8A800 100%)",
+                    color: "#1A1A2E",
+                    borderColor: "#1A1A2E",
+                    boxShadow: "0 3px 0 0 #1A1A2E, inset 0 2px 0 0 rgba(255,255,255,0.6)",
+                  }
+                : {
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+                    color: "#FFF8E7",
+                    borderColor: "transparent",
+                    opacity: 0.75,
+                  }
+            }
           >
             <span className="text-lg">📊</span>
             Stats (admin)

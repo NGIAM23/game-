@@ -207,7 +207,7 @@ export default function ProfilePage() {
         </div>
         <p className="font-mono text-[10px] opacity-50 leading-snug mb-3">
           🔒 Ta photo est traitée uniquement sur ton appareil pour générer un avatar : elle n'est jamais envoyée ni stockée
-          par luavio.
+          par Luavio.
         </p>
 
         <button

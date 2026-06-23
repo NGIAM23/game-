@@ -7,7 +7,7 @@ const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-fredoka" });
 const dmMono = DM_Mono({ subsets: ["latin"], weight: "400", variable: "--font-dm-mono" });
 
 export const metadata: Metadata = {
-  title: "luavio — Devenir meilleur, pour de vrai.",
+  title: "Luavio — Devenir meilleur, pour de vrai.",
   description: "Le seul jeu où tu gagnes des niveaux dans la vraie vie, avec preuve.",
 };
 
