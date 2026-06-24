@@ -8,6 +8,7 @@ import { levelFromTotalXp, rankFromLevel, randomAvatarSeed, CATEGORIES, category
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import CategoryIcon from "@/components/CategoryIcon";
+import StreakCalendar from "@/components/StreakCalendar";
 import { isSoundEnabled, setSoundEnabled, playClick, startAmbientMusic, stopAmbientMusic } from "@/lib/sound";
 
 function seedFromPhoto(file: File): Promise<string> {
@@ -48,6 +49,7 @@ interface ProfileData {
   avatar_seed: string | null;
   total_xp: number;
   current_streak: number;
+  streak_freezes: number;
   sparks: number;
   is_plus: boolean;
   xp_boost_until: string | null;
@@ -87,7 +89,7 @@ export default function ProfilePage() {
       setIsAnonymous(session.session.user.is_anonymous ?? false);
       const { data } = await supabase
         .from("profiles")
-        .select("pseudo, avatar_seed, total_xp, current_streak, sparks, is_plus, xp_boost_until")
+        .select("pseudo, avatar_seed, total_xp, current_streak, streak_freezes, sparks, is_plus, xp_boost_until")
         .eq("id", session.session.user.id)
         .single();
       if (data) {
@@ -207,6 +209,8 @@ export default function ProfilePage() {
               <span>⚡ {profile.sparks}</span>
             </div>
           </motion.div>
+
+          <StreakCalendar freezes={profile.streak_freezes} />
 
           <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] flex items-center justify-between">
             <div>
