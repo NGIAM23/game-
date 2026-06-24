@@ -94,6 +94,7 @@ export default function TasksPage() {
   const [error, setError] = useState<string | null>(null);
   const [totalXp, setTotalXp] = useState(0);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+  const completingRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     async function load() {
@@ -144,6 +145,8 @@ export default function TasksPage() {
   }, [router]);
 
   async function completeTask(taskId: string, isWeekly: boolean) {
+    if (completingRef.current.has(taskId)) return;
+    completingRef.current.add(taskId);
     setPending(taskId);
     const verified = verifyResults[taskId]?.verified ?? false;
     const { data: xpAwarded, error: rpcError } = await supabase.rpc("complete_task", {
@@ -151,6 +154,7 @@ export default function TasksPage() {
       p_verified: verified,
     });
     setPending(null);
+    completingRef.current.delete(taskId);
 
     if (!rpcError && typeof xpAwarded === "number") {
       if (isWeekly) {
@@ -224,7 +228,7 @@ export default function TasksPage() {
         <button
           disabled={isDone || pending === task.id}
           onClick={() => completeTask(task.id, isWeekly)}
-          className="flex-1 text-left disabled:cursor-default"
+          className="flex-1 text-left select-none disabled:cursor-default"
         >
           <span className={`block font-body font-semibold text-sm ${isDone ? "line-through opacity-60" : ""}`}>
             {task.label}
