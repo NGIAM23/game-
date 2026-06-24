@@ -10,6 +10,7 @@ import Avatar from "@/components/Avatar";
 import SundayBanner from "@/components/SundayBanner";
 import CategoryIcon from "@/components/CategoryIcon";
 import QuestsPanel from "@/components/QuestsPanel";
+import LootBox from "@/components/LootBox";
 
 interface Profile {
   id: string;
@@ -199,6 +200,7 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-8">
+        <LootBox />
         <QuestsPanel />
       </div>
 

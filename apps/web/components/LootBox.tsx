@@ -1,0 +1,90 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { playLevelUp, playError } from "@/lib/sound";
+
+interface Reward {
+  kind: "sparks" | "xp" | "streak_freeze";
+  amount: number;
+}
+
+const REWARD_LABEL: Record<Reward["kind"], (n: number) => string> = {
+  sparks: (n) => `+${n} ⚡ Sparks`,
+  xp: (n) => `+${n} XP`,
+  streak_freeze: (n) => `+${n} ❄️ Freeze de streak`,
+};
+
+export default function LootBox() {
+  const [available, setAvailable] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [reward, setReward] = useState<Reward | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("profiles")
+      .select("last_lootbox_on")
+      .single()
+      .then(({ data }) => {
+        const today = new Date().toISOString().slice(0, 10);
+        setAvailable(data?.last_lootbox_on !== today);
+      });
+  }, []);
+
+  async function open() {
+    if (!available || opening) return;
+    setOpening(true);
+    const { data, error } = await supabase.rpc("open_daily_lootbox");
+    setOpening(false);
+    if (error || !data || data.length === 0) {
+      playError();
+      return;
+    }
+    setReward(data[0] as Reward);
+    setAvailable(false);
+    playLevelUp();
+  }
+
+  return (
+    <>
+      <motion.button
+        onClick={open}
+        disabled={!available || opening}
+        whileTap={available ? { scale: 0.96 } : undefined}
+        className={`w-full flex items-center justify-between border-2 border-outline rounded-sticker px-4 py-3.5 shadow-[0_3px_0_0_#1A1A2E] transition mb-6 ${
+          available ? "bg-primary active:translate-y-1 active:shadow-none" : "bg-surface opacity-60"
+        }`}
+      >
+        <span className="font-heading text-sm">🎁 Coffre du jour</span>
+        <span className="font-mono text-[10px] uppercase tracking-widest">
+          {available ? "Ouvrir" : "Revenu demain"}
+        </span>
+      </motion.button>
+
+      <AnimatePresence>
+        {reward && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-6"
+            onClick={() => setReward(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.6, rotate: -6 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", bounce: 0.45 }}
+              className="bg-surface border-[3px] border-outline rounded-sticker p-8 text-center shadow-[0_5px_0_0_#1A1A2E]"
+            >
+              <div className="text-6xl mb-3">🎁</div>
+              <h2 className="font-heading text-xl mb-2">Coffre ouvert !</h2>
+              <p className="font-heading text-2xl text-secondary">{REWARD_LABEL[reward.kind](reward.amount)}</p>
+              <p className="font-mono text-[10px] opacity-50 mt-4">Touche pour fermer</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
