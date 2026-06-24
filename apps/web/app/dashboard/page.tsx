@@ -12,6 +12,7 @@ import CategoryIcon from "@/components/CategoryIcon";
 import QuestsPanel from "@/components/QuestsPanel";
 import LootBox from "@/components/LootBox";
 import CoachTip from "@/components/CoachTip";
+import BattlePassCard from "@/components/BattlePassCard";
 
 interface Profile {
   id: string;
@@ -201,6 +202,7 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-8">
+        <BattlePassCard />
         <LootBox />
         <CoachTip />
         <QuestsPanel />
