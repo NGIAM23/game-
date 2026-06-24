@@ -3,30 +3,60 @@
 
 alter table profiles add column if not exists streak_freezes integer not null default 1;
 
-create or replace function complete_task(p_task_id text)
+-- Supprime l'ancien overload à un seul paramètre devenu obsolète depuis 06_payments_cosmetics_social.sql
+-- (sinon il coexiste avec la version (text, boolean) ci-dessous et reste appelable par erreur).
+drop function if exists complete_task(text);
+
+create or replace function complete_task(p_task_id text, p_verified boolean default false)
 returns integer as $$
 declare
   v_base_xp integer;
   v_category text;
+  v_frequency text;
   v_xp integer;
+  v_sparks integer;
   v_last_completed date;
+  v_is_plus boolean;
+  v_period date;
+  v_boost_until timestamptz;
   v_freezes integer;
 begin
-  select base_xp, category into v_base_xp, v_category from tasks where id = p_task_id;
+  select base_xp, category, frequency into v_base_xp, v_category, v_frequency from tasks where id = p_task_id;
   if v_base_xp is null then
     raise exception 'Unknown task %', p_task_id;
   end if;
 
   v_xp := case when v_category = 'detoxEcran' then v_base_xp * 3 else v_base_xp end;
 
-  insert into task_completions (user_id, task_id, xp_awarded)
-  values (auth.uid(), p_task_id, v_xp);
+  if extract(dow from current_date) = 0 then
+    v_xp := v_xp * 2;
+  end if;
+
+  select is_plus, xp_boost_until into v_is_plus, v_boost_until from profiles where id = auth.uid();
+  if v_is_plus then
+    v_xp := round(v_xp * 1.1);
+  end if;
+
+  if v_boost_until is not null and v_boost_until > now() then
+    v_xp := v_xp * 2;
+  end if;
+
+  if p_verified then
+    v_xp := round(v_xp * 1.15);
+  end if;
+
+  v_sparks := greatest(1, v_xp / 5);
+  v_period := case when v_frequency = 'weekly' then date_trunc('week', current_date)::date else current_date end;
+
+  insert into task_completions (user_id, task_id, xp_awarded, completed_on, verified)
+  values (auth.uid(), p_task_id, v_xp, v_period, p_verified);
 
   select last_completed_on, streak_freezes into v_last_completed, v_freezes from profiles where id = auth.uid();
 
   update profiles
   set
     total_xp = total_xp + v_xp,
+    sparks = sparks + v_sparks,
     current_streak = case
       when v_last_completed = current_date then current_streak
       when v_last_completed = current_date - 1 then current_streak + 1
@@ -34,7 +64,7 @@ begin
       else 1
     end,
     streak_freezes = case
-      when v_last_completed = current_date - 2 and v_freezes > 0 then v_freezes - 1
+      when v_last_completed <> current_date and v_last_completed = current_date - 2 and v_freezes > 0 then v_freezes - 1
       else v_freezes
     end,
     last_completed_on = current_date
