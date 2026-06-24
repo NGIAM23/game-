@@ -212,6 +212,12 @@ export default function ProfilePage() {
           </motion.div>
 
           <WeeklyRecap />
+          <button
+            onClick={() => router.push("/wrapped")}
+            className="w-full font-heading text-sm bg-primary border-2 border-outline rounded-sticker py-3 mb-6 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+          >
+            🎉 Mon récap du mois
+          </button>
           <StreakCalendar freezes={profile.streak_freezes} />
 
           <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] flex items-center justify-between">
