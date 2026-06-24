@@ -11,6 +11,7 @@ import SundayBanner from "@/components/SundayBanner";
 import CategoryIcon from "@/components/CategoryIcon";
 import QuestsPanel from "@/components/QuestsPanel";
 import LootBox from "@/components/LootBox";
+import CoachTip from "@/components/CoachTip";
 
 interface Profile {
   id: string;
@@ -201,6 +202,7 @@ export default function Dashboard() {
 
       <div className="mt-8">
         <LootBox />
+        <CoachTip />
         <QuestsPanel />
       </div>
 

@@ -9,6 +9,7 @@ import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import CategoryIcon from "@/components/CategoryIcon";
 import StreakCalendar from "@/components/StreakCalendar";
+import WeeklyRecap from "@/components/WeeklyRecap";
 import { isSoundEnabled, setSoundEnabled, playClick, startAmbientMusic, stopAmbientMusic } from "@/lib/sound";
 
 function seedFromPhoto(file: File): Promise<string> {
@@ -210,6 +211,7 @@ export default function ProfilePage() {
             </div>
           </motion.div>
 
+          <WeeklyRecap />
           <StreakCalendar freezes={profile.streak_freezes} />
 
           <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] flex items-center justify-between">
