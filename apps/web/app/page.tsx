@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import LaunchBackdrop from "@/components/LaunchBackdrop";
 
 const TIPS = [
   "💡 Ajoute une photo preuve sur une tâche pour gagner +15% XP en plus.",
@@ -50,15 +51,17 @@ export default function Home() {
         transition={{ duration: 0.4 }}
         className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background px-6"
       >
+        <LaunchBackdrop />
+
         <motion.div
           animate={{ scale: [1, 1.08, 1], rotate: [-2, 2, -2] }}
           transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
-          className="font-heading text-5xl mb-6"
+          className="relative font-heading text-5xl mb-6"
           style={{ textShadow: "4px 4px 0 #FFD43B" }}
         >
           luav<span className="text-secondary">i</span>o
         </motion.div>
-        <div className="w-40 h-2.5 rounded-full bg-surface border-2 border-outline overflow-hidden mb-5">
+        <div className="relative w-40 h-2.5 rounded-full bg-surface border-2 border-outline overflow-hidden mb-5">
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: "100%" }}
@@ -66,7 +69,7 @@ export default function Home() {
             className="w-1/2 h-full bg-secondary"
           />
         </div>
-        <div className="h-10 max-w-sm text-center overflow-hidden">
+        <div className="relative h-10 max-w-sm text-center overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.p
               key={tipIndex}
@@ -80,7 +83,7 @@ export default function Home() {
             </motion.p>
           </AnimatePresence>
         </div>
-        <p className="font-mono text-[11px] uppercase tracking-widest opacity-50 mt-4">Chargement...</p>
+        <p className="relative font-mono text-[11px] uppercase tracking-widest opacity-50 mt-4">Chargement...</p>
       </motion.div>
     </AnimatePresence>
   );
