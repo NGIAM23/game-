@@ -17,6 +17,7 @@ interface ClanInfo {
   progress: number;
   claimed: boolean;
   member_count: number;
+  owner_id: string;
 }
 
 interface Member {
@@ -42,6 +43,13 @@ export default function ClanPage() {
   const [newClanName, setNewClanName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ClanSearchResult[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const [configName, setConfigName] = useState("");
+  const [configTarget, setConfigTarget] = useState(40);
+  const [configRewardXp, setConfigRewardXp] = useState(30);
+  const [configRewardSparks, setConfigRewardSparks] = useState(15);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const load = useCallback(async () => {
     const { data: session } = await supabase.auth.getSession();
@@ -49,12 +57,17 @@ export default function ClanPage() {
       router.push("/auth");
       return;
     }
+    setUserId(session.session.user.id);
     const { data: clanData } = await supabase.rpc("get_my_clan");
     const myClan = (clanData ?? [])[0] as ClanInfo | undefined;
     setClan(myClan ?? null);
     if (myClan) {
       const { data: membersData } = await supabase.rpc("get_clan_members");
       setMembers((membersData ?? []) as Member[]);
+      setConfigName(myClan.name);
+      setConfigTarget(myClan.weekly_target);
+      setConfigRewardXp(myClan.reward_xp);
+      setConfigRewardSparks(myClan.reward_sparks);
     }
     setLoading(false);
   }, [router]);
@@ -109,6 +122,42 @@ export default function ClanPage() {
     setBusy(false);
     playClick();
     load();
+  }
+
+  async function deleteClan() {
+    setBusy(true);
+    setError(null);
+    const { error: rpcError } = await supabase.rpc("delete_clan");
+    setBusy(false);
+    setShowDeleteConfirm(false);
+    if (rpcError) {
+      setError("Impossible de supprimer le clan.");
+      playError();
+    } else {
+      playClick();
+      load();
+    }
+  }
+
+  async function saveClanConfig() {
+    if (!configName.trim()) return;
+    setBusy(true);
+    setError(null);
+    const { error: rpcError } = await supabase.rpc("update_clan_settings", {
+      p_name: configName.trim(),
+      p_weekly_target: configTarget,
+      p_reward_xp: configRewardXp,
+      p_reward_sparks: configRewardSparks,
+    });
+    setBusy(false);
+    if (rpcError) {
+      setError("Réglages invalides ou nom déjà pris.");
+      playError();
+    } else {
+      playClick();
+      setShowConfig(false);
+      load();
+    }
   }
 
   async function claimReward() {
@@ -188,6 +237,66 @@ export default function ClanPage() {
             ))}
           </div>
 
+          {clan.owner_id === userId && (
+            <div className="bg-surface border-2 border-outline rounded-sticker p-4 mb-4 shadow-[0_3px_0_0_#1A1A2E]">
+              <button
+                onClick={() => setShowConfig((v) => !v)}
+                className="w-full font-heading text-sm text-left"
+              >
+                ⚙️ Configurer le clan {showConfig ? "▲" : "▼"}
+              </button>
+              {showConfig && (
+                <div className="flex flex-col gap-2.5 mt-3">
+                  <label className="font-mono text-[10px] uppercase tracking-widest opacity-50">
+                    Nom du clan
+                    <input
+                      value={configName}
+                      onChange={(e) => setConfigName(e.target.value)}
+                      className="w-full mt-1 bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+                    />
+                  </label>
+                  <label className="font-mono text-[10px] uppercase tracking-widest opacity-50">
+                    Objectif hebdo (tâches)
+                    <input
+                      type="number"
+                      min={1}
+                      value={configTarget}
+                      onChange={(e) => setConfigTarget(Number(e.target.value))}
+                      className="w-full mt-1 bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+                    />
+                  </label>
+                  <label className="font-mono text-[10px] uppercase tracking-widest opacity-50">
+                    Récompense XP / membre
+                    <input
+                      type="number"
+                      min={0}
+                      value={configRewardXp}
+                      onChange={(e) => setConfigRewardXp(Number(e.target.value))}
+                      className="w-full mt-1 bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+                    />
+                  </label>
+                  <label className="font-mono text-[10px] uppercase tracking-widest opacity-50">
+                    Récompense Sparks / membre
+                    <input
+                      type="number"
+                      min={0}
+                      value={configRewardSparks}
+                      onChange={(e) => setConfigRewardSparks(Number(e.target.value))}
+                      className="w-full mt-1 bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body"
+                    />
+                  </label>
+                  <button
+                    onClick={saveClanConfig}
+                    disabled={busy || !configName.trim()}
+                    className="font-heading text-sm bg-primary border-2 border-outline rounded-sticker py-2.5 mt-1 shadow-[0_2px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             onClick={leaveClan}
             disabled={busy}
@@ -195,6 +304,45 @@ export default function ClanPage() {
           >
             Quitter le clan
           </button>
+
+          {clan.owner_id === userId && (
+            <>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={busy}
+                className="w-full font-heading text-cat-corps bg-background border-2 border-outline rounded-sticker py-3 mt-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50"
+              >
+                Supprimer le clan
+              </button>
+              {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-6" onClick={() => setShowDeleteConfirm(false)}>
+                  <div
+                    className="bg-surface border-[3px] border-outline rounded-sticker p-6 text-center shadow-[0_5px_0_0_#1A1A2E] max-w-xs"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <p className="font-body text-sm mb-4">
+                      Supprimer définitivement « {clan.name} » ? Tous les membres seront retirés.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 font-heading text-sm bg-background border-2 border-outline rounded-sticker py-2.5"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={deleteClan}
+                        disabled={busy}
+                        className="flex-1 font-heading text-sm text-white bg-cat-corps border-2 border-outline rounded-sticker py-2.5 disabled:opacity-50"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       ) : (
         <div>
