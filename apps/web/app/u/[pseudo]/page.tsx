@@ -16,6 +16,7 @@ interface PublicProfile {
   current_streak: number;
   equipped_avatar_bg: string | null;
   equipped_badge: string | null;
+  equipped_title: string | null;
 }
 
 export default function PublicProfilePage() {
@@ -24,6 +25,7 @@ export default function PublicProfilePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [bgColor, setBgColor] = useState<string | null>(null);
   const [badgeEmoji, setBadgeEmoji] = useState<string | null>(null);
+  const [title, setTitle] = useState<string | null>(null);
   const [meId, setMeId] = useState<string | null>(null);
   const [friendStatus, setFriendStatus] = useState<"none" | "pending_sent" | "pending_received" | "accepted">("none");
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ export default function PublicProfilePage() {
 
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, pseudo, avatar_seed, total_xp, current_streak, equipped_avatar_bg, equipped_badge")
+        .select("id, pseudo, avatar_seed, total_xp, current_streak, equipped_avatar_bg, equipped_badge, equipped_title")
         .eq("pseudo", params.pseudo)
         .single();
 
@@ -58,6 +60,10 @@ export default function PublicProfilePage() {
       if (data.equipped_badge) {
         const { data: badge } = await supabase.from("cosmetics").select("value").eq("id", data.equipped_badge).single();
         setBadgeEmoji(badge?.value ?? null);
+      }
+      if (data.equipped_title) {
+        const { data: titleCosmetic } = await supabase.from("cosmetics").select("value").eq("id", data.equipped_title).single();
+        setTitle(titleCosmetic?.value ?? null);
       }
 
       if (data.id !== session.session.user.id) {
@@ -126,6 +132,11 @@ export default function PublicProfilePage() {
         <div className="font-heading text-xl mb-0.5">
           @{profile.pseudo} {badgeEmoji && <span>{badgeEmoji}</span>}
         </div>
+        {title && (
+          <div className="inline-block font-heading text-[10px] bg-primary text-outline border-2 border-outline rounded-full px-2.5 py-0.5 mb-2">
+            {title}
+          </div>
+        )}
         <div className="font-mono text-xs uppercase tracking-widest opacity-80 mb-3">{rank}</div>
         <div className="flex items-center justify-center gap-4 font-heading text-sm">
           <span>Niv. {level}</span>

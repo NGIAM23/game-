@@ -11,12 +11,15 @@ interface Profile {
   pseudo: string | null;
   sparks: number;
   is_plus: boolean;
+  equipped_avatar_bg: string | null;
+  equipped_badge: string | null;
+  equipped_title: string | null;
 }
 
 interface Cosmetic {
   id: string;
   name: string;
-  kind: "avatar_bg" | "badge";
+  kind: "avatar_bg" | "badge" | "title";
   value: string;
   price_sparks: number;
 }
@@ -42,7 +45,7 @@ function ShopContent() {
   async function loadProfile(userId: string) {
     const { data } = await supabase
       .from("profiles")
-      .select("id, pseudo, sparks, is_plus")
+      .select("id, pseudo, sparks, is_plus, equipped_avatar_bg, equipped_badge, equipped_title")
       .eq("id", userId)
       .single();
     setProfile(data);
@@ -117,6 +120,37 @@ function ShopContent() {
       setOwned((prev) => new Set(prev).add(id));
       setProfile({ ...profile, sparks: profile.sparks - (cosmetic?.price_sparks ?? 0) });
     }
+  }
+
+  function equippedKey(kind: Cosmetic["kind"]) {
+    if (!profile) return null;
+    if (kind === "avatar_bg") return profile.equipped_avatar_bg;
+    if (kind === "badge") return profile.equipped_badge;
+    return profile.equipped_title;
+  }
+
+  async function toggleEquip(c: Cosmetic) {
+    if (!profile) return;
+    setBusy(c.id);
+    const isEquipped = equippedKey(c.kind) === c.id;
+    if (isEquipped) {
+      await supabase.rpc("unequip_cosmetic", { p_kind: c.kind });
+      setProfile({
+        ...profile,
+        equipped_avatar_bg: c.kind === "avatar_bg" ? null : profile.equipped_avatar_bg,
+        equipped_badge: c.kind === "badge" ? null : profile.equipped_badge,
+        equipped_title: c.kind === "title" ? null : profile.equipped_title,
+      });
+    } else {
+      await supabase.rpc("equip_cosmetic", { p_cosmetic_id: c.id });
+      setProfile({
+        ...profile,
+        equipped_avatar_bg: c.kind === "avatar_bg" ? c.id : profile.equipped_avatar_bg,
+        equipped_badge: c.kind === "badge" ? c.id : profile.equipped_badge,
+        equipped_title: c.kind === "title" ? c.id : profile.equipped_title,
+      });
+    }
+    setBusy(null);
   }
 
   if (loading || !profile)
@@ -202,34 +236,49 @@ function ShopContent() {
         </div>
       </div>
 
-      {(["avatar_bg", "badge"] as const).map((kind) => {
+      {(["avatar_bg", "badge", "title"] as const).map((kind) => {
         const items = cosmetics.filter((c) => c.kind === kind);
         if (items.length === 0) return null;
         return (
           <div key={kind} className="mb-8">
             <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mb-3">
-              {kind === "avatar_bg" ? "🎨 Fonds d'avatar" : "🏷️ Badges"}
+              {kind === "avatar_bg" ? "🎨 Fonds d'avatar" : kind === "badge" ? "🏷️ Badges" : "📛 Titres"}
             </h2>
             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-6 px-6 snap-x lg:flex-wrap lg:overflow-visible lg:mx-0 lg:px-0">
               {items.map((c) => {
                 const isOwned = owned.has(c.id);
+                const isEquipped = equippedKey(c.kind) === c.id;
                 return (
                   <motion.div
                     key={c.id}
                     whileHover={{ y: -3 }}
-                    className="snap-start flex-shrink-0 w-32 bg-surface border-2 border-outline rounded-sticker p-3 shadow-[0_3px_0_0_#1A1A2E] text-center"
+                    className={`snap-start flex-shrink-0 w-32 bg-surface border-2 rounded-sticker p-3 shadow-[0_3px_0_0_#1A1A2E] text-center ${
+                      isEquipped ? "border-secondary" : "border-outline"
+                    }`}
                   >
                     {c.kind === "avatar_bg" ? (
                       <div
                         className="w-14 h-14 rounded-full border-2 border-outline mx-auto mb-2"
-                        style={{ background: `linear-gradient(160deg, ${c.value}, #6750E8)` }}
+                        style={{ background: c.value.startsWith("linear-gradient") ? c.value : `linear-gradient(160deg, ${c.value}, #6750E8)` }}
                       />
-                    ) : (
+                    ) : c.kind === "badge" ? (
                       <div className="text-3xl mb-2">{c.value}</div>
+                    ) : (
+                      <div className="font-heading text-xs mb-2 bg-background border-2 border-outline rounded-full px-2 py-1 truncate">
+                        {c.value}
+                      </div>
                     )}
                     <div className="font-body font-semibold text-xs mb-2 truncate">{c.name}</div>
                     {isOwned ? (
-                      <span className="font-mono text-[10px] opacity-50">✓ Possédé</span>
+                      <button
+                        onClick={() => toggleEquip(c)}
+                        disabled={busy === c.id}
+                        className={`font-heading text-[10px] border-2 border-outline rounded-full px-2.5 py-1 disabled:opacity-40 w-full ${
+                          isEquipped ? "bg-secondary text-white" : "bg-background"
+                        }`}
+                      >
+                        {busy === c.id ? "..." : isEquipped ? "✓ Équipé" : "Équiper"}
+                      </button>
                     ) : (
                       <button
                         onClick={() => purchaseCosmetic(c.id)}
