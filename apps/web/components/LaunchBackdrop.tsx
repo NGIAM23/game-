@@ -37,7 +37,7 @@ export default function LaunchBackdrop() {
             <stop offset="45%" stopColor="#9B8CF0" />
             <stop offset="100%" stopColor="#FFF8E7" />
           </linearGradient>
-          <radialGradient id={`launchGlow-${uid}`} cx="50%" cy="38%" r="55%">
+          <radialGradient id={`launchGlow-${uid}`} cx="50%" cy="20%" r="40%">
             <stop offset="0%" stopColor="#FFE17D" stopOpacity={0.85} />
             <stop offset="45%" stopColor="#FFD43B" stopOpacity={0.35} />
             <stop offset="100%" stopColor="#FFD43B" stopOpacity={0} />
@@ -53,7 +53,7 @@ export default function LaunchBackdrop() {
           return <circle key={i} cx={sx} cy={sy} r={r} fill="#FFFFFF" opacity={0.25 + (i % 4) * 0.1} />;
         })}
 
-        <circle cx="600" cy="300" r="280" fill={`url(#launchGlow-${uid})`} />
+        <circle cx="600" cy="160" r="220" fill={`url(#launchGlow-${uid})`} />
 
         <Cloud x={170} y={150} scale={1.1} opacity={0.5} />
         <Cloud x={1010} y={210} scale={0.9} opacity={0.4} />
@@ -69,26 +69,26 @@ export default function LaunchBackdrop() {
       </svg>
 
       <motion.div
-        className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2"
-        style={{ width: 340, height: 340 }}
+        className="absolute left-1/2 top-[16%] -translate-x-1/2 -translate-y-1/2"
+        style={{ width: 230, height: 230 }}
         animate={{ rotate: 360 }}
         transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
       >
         {ORBIT.map((o) => {
           const rad = (o.angle * Math.PI) / 180;
-          const radius = 150;
-          const cx = 170 + radius * Math.cos(rad);
-          const cy = 170 + radius * Math.sin(rad);
+          const radius = 95;
+          const cx = 115 + radius * Math.cos(rad);
+          const cy = 115 + radius * Math.sin(rad);
           return (
             <motion.div
               key={o.id}
               className="absolute"
-              style={{ left: cx - 18, top: cy - 18 }}
+              style={{ left: cx - 16, top: cy - 16 }}
               animate={{ rotate: -360 }}
               transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
             >
-              <div className="rounded-full bg-surface border-2 border-outline p-1.5 shadow-[0_2px_0_rgba(26,26,46,0.25)]">
-                <CategoryIcon id={o.id} size={21} />
+              <div className="rounded-full bg-surface border-2 border-outline p-1 shadow-[0_2px_0_rgba(26,26,46,0.25)]">
+                <CategoryIcon id={o.id} size={18} />
               </div>
             </motion.div>
           );
@@ -96,11 +96,11 @@ export default function LaunchBackdrop() {
       </motion.div>
 
       <motion.div
-        className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2"
+        className="absolute left-1/2 top-[16%] -translate-x-1/2 -translate-y-1/2"
         animate={{ scale: [1, 1.08, 1] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
       >
-        <svg width={86} height={86} viewBox="0 0 24 24" className="drop-shadow-[0_0_18px_rgba(255,212,59,0.65)]">
+        <svg width={64} height={64} viewBox="0 0 24 24" className="drop-shadow-[0_0_18px_rgba(255,212,59,0.65)]">
           <defs>
             <linearGradient id={`launchMark-${uid}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#FFE17D" />
