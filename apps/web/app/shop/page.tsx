@@ -34,10 +34,10 @@ const RARITY_STYLE: Record<Cosmetic["rarity"], { border: string; label: string; 
 
 const SPARKS_PACKS = [
   { id: "sparks-99", sparks: 100, priceLabel: "0,99 €" },
-  { id: "sparks-499", sparks: 550, priceLabel: "4,99 €" },
-  { id: "sparks-999", sparks: 1200, priceLabel: "9,99 €" },
-  { id: "sparks-1999", sparks: 2600, priceLabel: "19,99 €" },
-  { id: "sparks-4999", sparks: 7000, priceLabel: "49,99 €" },
+  { id: "sparks-499", sparks: 650, priceLabel: "4,99 €" },
+  { id: "sparks-999", sparks: 1500, priceLabel: "9,99 €", badge: "Populaire" },
+  { id: "sparks-1999", sparks: 3400, priceLabel: "19,99 €", badge: "Meilleure offre" },
+  { id: "sparks-4999", sparks: 10000, priceLabel: "49,99 €" },
 ];
 
 function ShopContent() {
@@ -205,7 +205,7 @@ function ShopContent() {
               </span>
             )}
           </div>
-          <div className="font-heading text-3xl mb-1">3,99 € / mois</div>
+          <div className="font-heading text-3xl mb-1">4,99 € / mois</div>
           <p className="font-mono text-[11px] opacity-80 mb-4">Annulable à tout moment.</p>
           <ul className="flex flex-col gap-2 mb-5 text-sm font-body">
             <li>⚡ +10% XP sur chaque tâche</li>
@@ -236,8 +236,13 @@ function ShopContent() {
                 key={pack.id}
                 onClick={() => startCheckout("sparks_pack", pack.id)}
                 disabled={busy === pack.id}
-                className="bg-surface border-2 border-outline rounded-sticker p-3 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 text-center"
+                className="relative bg-surface border-2 border-outline rounded-sticker p-3 pt-4 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 text-center"
               >
+                {"badge" in pack && pack.badge && (
+                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 font-heading text-[8px] uppercase tracking-widest rounded-full px-2 py-0.5 bg-secondary text-white whitespace-nowrap">
+                    {pack.badge}
+                  </span>
+                )}
                 <div className="font-heading text-sm">⚡ {pack.sparks}</div>
                 <div className="font-mono text-[11px] opacity-60">{busy === pack.id ? "..." : pack.priceLabel}</div>
               </button>

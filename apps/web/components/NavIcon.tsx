@@ -1,4 +1,4 @@
-export type NavIconId = "home" | "tasks" | "leaderboard" | "friends" | "shop" | "profile" | "admin" | "logout";
+export type NavIconId = "home" | "tasks" | "leaderboard" | "friends" | "shop" | "profile" | "admin" | "logout" | "battlepass";
 
 function IconHome() {
   return (
@@ -104,6 +104,16 @@ function IconLogout() {
   );
 }
 
+function IconBattlePass() {
+  return (
+    <>
+      <path d="M12 2.6 14.4 9 21 9.8 16.1 14 17.7 20.6 12 17 6.3 20.6 7.9 14 3 9.8 9.6 9z" strokeLinejoin="round" fill="currentColor" fillOpacity={0.2} />
+      <circle cx="12" cy="11.4" r="3.2" fill="currentColor" fillOpacity={0.3} />
+      <circle cx="12" cy="11.4" r="3.2" />
+    </>
+  );
+}
+
 const ICONS: Record<NavIconId, () => JSX.Element> = {
   home: IconHome,
   tasks: IconTasks,
@@ -113,6 +123,7 @@ const ICONS: Record<NavIconId, () => JSX.Element> = {
   profile: IconProfile,
   admin: IconAdmin,
   logout: IconLogout,
+  battlepass: IconBattlePass,
 };
 
 export default function NavIcon({

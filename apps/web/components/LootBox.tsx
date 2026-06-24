@@ -16,21 +16,50 @@ const REWARD_LABEL: Record<Reward["kind"], (n: number) => string> = {
   streak_freeze: (n) => `+${n} ❄️ Freeze de streak`,
 };
 
+function nextResetAt() {
+  const next = new Date();
+  next.setUTCHours(0, 0, 0, 0);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
+
+function formatCountdown(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export default function LootBox() {
   const [available, setAvailable] = useState(false);
   const [opening, setOpening] = useState(false);
   const [reward, setReward] = useState<Reward | null>(null);
+  const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
-    supabase
-      .from("profiles")
-      .select("last_lootbox_on")
-      .single()
-      .then(({ data }) => {
-        const today = new Date().toISOString().slice(0, 10);
-        setAvailable(data?.last_lootbox_on !== today);
-      });
+    async function load() {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("last_lootbox_on")
+        .eq("id", session.session.user.id)
+        .single();
+      const today = new Date().toISOString().slice(0, 10);
+      setAvailable(data?.last_lootbox_on !== today);
+    }
+    load();
   }, []);
+
+  useEffect(() => {
+    if (available) return;
+    const target = nextResetAt();
+    const tick = () => setCountdown(formatCountdown(target.getTime() - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [available]);
 
   async function open() {
     if (!available || opening) return;
@@ -39,6 +68,7 @@ export default function LootBox() {
     setOpening(false);
     if (error || !data || data.length === 0) {
       playError();
+      setAvailable(false);
       return;
     }
     setReward(data[0] as Reward);
@@ -70,9 +100,18 @@ export default function LootBox() {
           {opening ? "✨" : "🎁"}
         </motion.div>
         <span className="relative font-heading text-sm text-outline">Coffre du jour</span>
-        <span className="relative font-mono text-[10px] uppercase tracking-widest bg-black/15 border-2 border-outline rounded-full px-3 py-1 mt-2">
-          {opening ? "Ouverture..." : available ? "Toucher pour ouvrir" : "Revient demain"}
-        </span>
+        {available ? (
+          <span className="relative font-mono text-[10px] uppercase tracking-widest bg-black/15 border-2 border-outline rounded-full px-3 py-1 mt-2">
+            {opening ? "Ouverture..." : "Toucher pour ouvrir"}
+          </span>
+        ) : (
+          <div className="relative flex flex-col items-center gap-1 mt-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest bg-black/15 border-2 border-outline rounded-full px-3 py-1">
+              Déjà ouvert aujourd'hui
+            </span>
+            <span className="font-heading text-xs text-outline">Prochain coffre dans {countdown}</span>
+          </div>
+        )}
       </motion.button>
 
       <AnimatePresence>
