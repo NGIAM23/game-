@@ -1,5 +1,7 @@
 -- Permet au créateur du clan de le configurer (nom, objectif, récompenses) ou de le supprimer.
 
+drop function if exists get_my_clan();
+
 create or replace function get_my_clan()
 returns table(
   clan_id uuid, name text, weekly_target integer, reward_xp integer, reward_sparks integer,
