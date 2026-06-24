@@ -140,7 +140,16 @@ export default function FriendsPage() {
       <h1 className="font-heading text-3xl text-center mb-1">
         Mes <span className="text-secondary">amis</span>
       </h1>
-      <p className="font-mono text-xs uppercase tracking-widest opacity-50 text-center mb-6">Trouve et ajoute tes amis</p>
+      <p className="font-mono text-xs uppercase tracking-widest opacity-50 text-center mb-4">Trouve et ajoute tes amis</p>
+
+      <div className="text-center mb-6">
+        <Link
+          href="/clan"
+          className="inline-block font-heading text-sm bg-secondary text-white border-2 border-outline rounded-sticker px-5 py-2.5 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition"
+        >
+          🛡️ Mon clan
+        </Link>
+      </div>
 
       <div className="lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-6 lg:items-start">
         <div>
