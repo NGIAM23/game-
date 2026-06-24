@@ -69,30 +69,25 @@ export default function LaunchBackdrop() {
       </svg>
 
       <motion.div
-        className="absolute left-1/2 top-[16%] -translate-x-1/2 -translate-y-1/2"
-        style={{ width: 230, height: 230 }}
+        className="absolute left-1/2 top-[16%] w-0 h-0"
         animate={{ rotate: 360 }}
         transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
       >
-        {ORBIT.map((o) => {
-          const rad = (o.angle * Math.PI) / 180;
-          const radius = 95;
-          const cx = 115 + radius * Math.cos(rad);
-          const cy = 115 + radius * Math.sin(rad);
-          return (
+        {ORBIT.map((o) => (
+          <div key={o.id} className="absolute left-0 top-0" style={{ transform: `rotate(${o.angle}deg)` }}>
             <motion.div
-              key={o.id}
-              className="absolute"
-              style={{ left: cx - 16, top: cy - 16 }}
+              style={{ transform: "translateX(95px)" }}
               animate={{ rotate: -360 }}
               transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
             >
-              <div className="rounded-full bg-surface border-2 border-outline p-1 shadow-[0_2px_0_rgba(26,26,46,0.25)]">
+              <div
+                className="rounded-full bg-surface border-2 border-outline p-1 shadow-[0_2px_0_rgba(26,26,46,0.25)] -translate-x-1/2 -translate-y-1/2"
+              >
                 <CategoryIcon id={o.id} size={18} />
               </div>
             </motion.div>
-          );
-        })}
+          </div>
+        ))}
       </motion.div>
 
       <motion.div
