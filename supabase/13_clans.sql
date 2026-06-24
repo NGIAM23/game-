@@ -93,7 +93,7 @@ declare
   v_clan_id uuid;
   v_period date;
 begin
-  select clan_id into v_clan_id from clan_members where user_id = auth.uid();
+  select cm.clan_id into v_clan_id from clan_members cm where cm.user_id = auth.uid();
   if v_clan_id is null then
     return;
   end if;
@@ -121,7 +121,7 @@ declare
   v_clan_id uuid;
   v_period date;
 begin
-  select clan_id into v_clan_id from clan_members where user_id = auth.uid();
+  select cm.clan_id into v_clan_id from clan_members cm where cm.user_id = auth.uid();
   if v_clan_id is null then
     return;
   end if;
@@ -150,7 +150,7 @@ declare
   v_progress integer;
   v_already_claimed boolean;
 begin
-  select clan_id into v_clan_id from clan_members where user_id = auth.uid();
+  select cm.clan_id into v_clan_id from clan_members cm where cm.user_id = auth.uid();
   if v_clan_id is null then
     raise exception 'Not in a clan';
   end if;
