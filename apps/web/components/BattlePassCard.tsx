@@ -32,23 +32,26 @@ export default function BattlePassCard() {
   const daysLeft = Math.max(0, Math.ceil((new Date(progress.ends_on).getTime() - Date.now()) / 86400000));
 
   return (
-    <motion.button
-      onClick={() => router.push("/battle-pass")}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full text-left bg-secondary text-white border-2 border-outline rounded-sticker p-4 mb-6 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-0.5 active:shadow-none transition"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-heading text-sm">🎖️ {progress.season_name}</span>
-        <span className="font-mono text-[10px] opacity-70">{daysLeft}j restants</span>
-      </div>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="font-heading text-xs">Niveau {progress.level}</span>
-        <span className="font-mono text-[10px] opacity-80">{progress.xp_into_level}/{progress.xp_for_next_level} XP</span>
-      </div>
-      <div className="h-2.5 bg-black/30 border-2 border-outline rounded-full overflow-hidden">
-        <motion.div className="h-full bg-primary" animate={{ width: `${pct}%` }} transition={{ type: "spring", bounce: 0.3 }} />
-      </div>
-    </motion.button>
+    <div className="mb-6">
+      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mb-2">🎖️ Battle Pass</h2>
+      <motion.button
+        onClick={() => router.push("/battle-pass")}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full text-left bg-secondary text-white border-2 border-outline rounded-sticker p-4 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-0.5 active:shadow-none transition"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-heading text-sm">{progress.season_name}</span>
+          <span className="font-mono text-[10px] opacity-70">{daysLeft}j restants</span>
+        </div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="font-heading text-xs">Niveau {progress.level}</span>
+          <span className="font-mono text-[10px] opacity-80">{progress.xp_into_level}/{progress.xp_for_next_level} XP</span>
+        </div>
+        <div className="h-2.5 bg-black/30 border-2 border-outline rounded-full overflow-hidden">
+          <motion.div className="h-full bg-primary" animate={{ width: `${pct}%` }} transition={{ type: "spring", bounce: 0.3 }} />
+        </div>
+      </motion.button>
+    </div>
   );
 }

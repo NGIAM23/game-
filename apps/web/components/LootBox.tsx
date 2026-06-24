@@ -51,14 +51,27 @@ export default function LootBox() {
       <motion.button
         onClick={open}
         disabled={!available || opening}
-        whileTap={available ? { scale: 0.96 } : undefined}
-        className={`w-full flex items-center justify-between border-2 border-outline rounded-sticker px-4 py-3.5 shadow-[0_3px_0_0_#1A1A2E] transition mb-6 ${
-          available ? "bg-primary active:translate-y-1 active:shadow-none" : "bg-surface opacity-60"
-        }`}
+        whileTap={available ? { scale: 0.95 } : undefined}
+        className="relative w-full flex flex-col items-center justify-center bg-gradient-to-b from-primary to-amber-500 border-[3px] border-outline rounded-sticker pt-5 pb-4 shadow-[0_5px_0_0_#1A1A2E] transition mb-6 active:translate-y-1 active:shadow-none disabled:opacity-70 overflow-hidden"
       >
-        <span className="font-heading text-sm">🎁 Coffre du jour</span>
-        <span className="font-mono text-[10px] uppercase tracking-widest">
-          {available ? "Ouvrir" : "Revenu demain"}
+        {available && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.5), transparent 60%)" }}
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity }}
+          />
+        )}
+        <motion.div
+          className="relative text-6xl mb-1"
+          animate={available ? { y: [0, -4, 0], rotate: [-3, 3, -3] } : undefined}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {opening ? "✨" : "🎁"}
+        </motion.div>
+        <span className="relative font-heading text-sm text-outline">Coffre du jour</span>
+        <span className="relative font-mono text-[10px] uppercase tracking-widest bg-black/15 border-2 border-outline rounded-full px-3 py-1 mt-2">
+          {opening ? "Ouverture..." : available ? "Toucher pour ouvrir" : "Revient demain"}
         </span>
       </motion.button>
 
@@ -77,7 +90,7 @@ export default function LootBox() {
               transition={{ type: "spring", bounce: 0.45 }}
               className="bg-surface border-[3px] border-outline rounded-sticker p-8 text-center shadow-[0_5px_0_0_#1A1A2E]"
             >
-              <div className="text-6xl mb-3">🎁</div>
+              <div className="text-6xl mb-3">🎉</div>
               <h2 className="font-heading text-xl mb-2">Coffre ouvert !</h2>
               <p className="font-heading text-2xl text-secondary">{REWARD_LABEL[reward.kind](reward.amount)}</p>
               <p className="font-mono text-[10px] opacity-50 mt-4">Touche pour fermer</p>

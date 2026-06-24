@@ -29,27 +29,29 @@ export default function CoachTip() {
   if (!tip) return null;
 
   return (
-    <motion.button
-      onClick={() => router.push("/tasks")}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full flex items-center gap-3 bg-surface border-2 border-outline rounded-sticker p-4 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition mb-6 text-left"
-    >
-      <span
-        className="w-10 h-10 rounded-lg border-2 border-outline flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: categoryColors[tip.category] }}
+    <div className="mb-6">
+      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mb-2">🧭 Coach IA</h2>
+      <motion.button
+        onClick={() => router.push("/tasks")}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full flex items-center gap-3 bg-surface border-2 border-outline rounded-sticker p-4 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition text-left"
       >
-        <CategoryIcon id={tip.category} size={22} />
-      </span>
-      <div className="flex-1">
-        <p className="font-heading text-xs mb-0.5">🧭 Conseil du coach</p>
-        <p className="font-body text-xs opacity-70">
-          {tip.recent_count === 0
-            ? `Tu n'as fait aucune tâche ${tip.label} depuis 2 semaines.`
-            : `Tu as un peu négligé ${tip.label} ces 2 dernières semaines.`}
-          {tip.suggested_label && ` Essaie : "${tip.suggested_label}"`}
-        </p>
-      </div>
-    </motion.button>
+        <span
+          className="w-10 h-10 rounded-lg border-2 border-outline flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: categoryColors[tip.category] }}
+        >
+          <CategoryIcon id={tip.category} size={22} />
+        </span>
+        <div className="flex-1">
+          <p className="font-body text-xs font-semibold opacity-80">
+            {tip.recent_count === 0
+              ? `Tu n'as fait aucune tâche ${tip.label} depuis 2 semaines.`
+              : `Tu as un peu négligé ${tip.label} ces 2 dernières semaines.`}
+          </p>
+          {tip.suggested_label && <p className="font-body text-xs mt-1">Essaie : « {tip.suggested_label} »</p>}
+        </div>
+      </motion.button>
+    </div>
   );
 }

@@ -18,12 +18,14 @@ begin
   ),
   worst as (
     select * from counts order by n asc, random() limit 1
+  ),
+  suggestion as (
+    select t.id, t.label from tasks t, worst where t.category = worst.cat_id and t.frequency = 'daily' order by random() limit 1
   )
   select
     worst.cat_id, worst.cat_label, worst.n::integer,
-    (select t.id from tasks t where t.category = worst.cat_id and t.frequency = 'daily' order by random() limit 1),
-    (select t.label from tasks t where t.category = worst.cat_id and t.frequency = 'daily' order by random() limit 1)
-  from worst;
+    suggestion.id, suggestion.label
+  from worst left join suggestion on true;
 end;
 $$ language plpgsql security definer;
 

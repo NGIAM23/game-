@@ -22,7 +22,15 @@ interface Cosmetic {
   kind: "avatar_bg" | "badge" | "title";
   value: string;
   price_sparks: number;
+  rarity: "common" | "rare" | "epic" | "legendary";
 }
+
+const RARITY_STYLE: Record<Cosmetic["rarity"], { border: string; label: string; badge: string }> = {
+  common: { border: "border-outline", label: "Commun", badge: "bg-background" },
+  rare: { border: "border-blue-400", label: "Rare", badge: "bg-blue-400 text-white" },
+  epic: { border: "border-purple-500", label: "Épique", badge: "bg-purple-500 text-white" },
+  legendary: { border: "border-amber-400", label: "Légendaire", badge: "bg-gradient-to-r from-amber-400 to-pink-500 text-white" },
+};
 
 const SPARKS_PACKS = [
   { id: "sparks-99", sparks: 100, priceLabel: "0,99 €" },
@@ -60,8 +68,10 @@ function ShopContent() {
       }
       await loadProfile(session.session.user.id);
 
-      const { data: cosmeticsData } = await supabase.from("cosmetics").select("id, name, kind, value, price_sparks");
-      setCosmetics(cosmeticsData ?? []);
+      const { data: cosmeticsData } = await supabase.from("cosmetics").select("id, name, kind, value, price_sparks, rarity");
+      setCosmetics(
+        ((cosmeticsData ?? []) as Cosmetic[]).sort((a, b) => a.price_sparks - b.price_sparks)
+      );
 
       const { data: ownedData } = await supabase.from("profile_cosmetics").select("cosmetic_id");
       setOwned(new Set((ownedData ?? []).map((o) => o.cosmetic_id)));
@@ -248,14 +258,18 @@ function ShopContent() {
               {items.map((c) => {
                 const isOwned = owned.has(c.id);
                 const isEquipped = equippedKey(c.kind) === c.id;
+                const rarity = RARITY_STYLE[c.rarity];
                 return (
                   <motion.div
                     key={c.id}
                     whileHover={{ y: -3 }}
-                    className={`snap-start flex-shrink-0 w-32 bg-surface border-2 rounded-sticker p-3 shadow-[0_3px_0_0_#1A1A2E] text-center ${
-                      isEquipped ? "border-secondary" : "border-outline"
+                    className={`relative snap-start flex-shrink-0 w-32 bg-surface border-2 rounded-sticker pt-4 pb-3 px-3 mt-2 shadow-[0_3px_0_0_#1A1A2E] text-center ${
+                      isEquipped ? "border-secondary" : rarity.border
                     }`}
                   >
+                    <span className={`absolute -top-2 left-1/2 -translate-x-1/2 font-heading text-[8px] uppercase tracking-widest rounded-full px-2 py-0.5 ${rarity.badge}`}>
+                      {rarity.label}
+                    </span>
                     {c.kind === "avatar_bg" ? (
                       <div
                         className="w-14 h-14 rounded-full border-2 border-outline mx-auto mb-2"
