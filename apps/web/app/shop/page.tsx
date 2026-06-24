@@ -33,12 +33,18 @@ const RARITY_STYLE: Record<Cosmetic["rarity"], { border: string; label: string; 
 };
 
 const SPARKS_PACKS = [
-  { id: "sparks-99", sparks: 100, priceLabel: "0,99 €" },
-  { id: "sparks-499", sparks: 650, priceLabel: "4,99 €" },
-  { id: "sparks-999", sparks: 1500, priceLabel: "9,99 €", badge: "Populaire" },
-  { id: "sparks-1999", sparks: 3400, priceLabel: "19,99 €", badge: "Meilleure offre" },
-  { id: "sparks-4999", sparks: 10000, priceLabel: "49,99 €" },
+  { id: "sparks-99", sparks: 100, priceCents: 99, priceLabel: "0,99 €" },
+  { id: "sparks-499", sparks: 650, priceCents: 499, priceLabel: "4,99 €" },
+  { id: "sparks-999", sparks: 1500, priceCents: 999, priceLabel: "9,99 €", badge: "Populaire" },
+  { id: "sparks-1999", sparks: 3400, priceCents: 1999, priceLabel: "19,99 €", badge: "Meilleure offre" },
+  { id: "sparks-4999", sparks: 10000, priceCents: 4999, priceLabel: "49,99 €" },
 ];
+
+const BASE_RATE = SPARKS_PACKS[0].sparks / SPARKS_PACKS[0].priceCents;
+
+function bonusPercent(pack: { sparks: number; priceCents: number }) {
+  return Math.round((pack.sparks / pack.priceCents / BASE_RATE - 1) * 100);
+}
 
 function ShopContent() {
   const router = useRouter();
@@ -231,22 +237,32 @@ function ShopContent() {
         <div>
           <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mb-3">Packs de Sparks</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5">
-            {SPARKS_PACKS.map((pack) => (
-              <button
-                key={pack.id}
-                onClick={() => startCheckout("sparks_pack", pack.id)}
-                disabled={busy === pack.id}
-                className="relative bg-surface border-2 border-outline rounded-sticker p-3 pt-4 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 text-center"
-              >
-                {"badge" in pack && pack.badge && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 font-heading text-[8px] uppercase tracking-widest rounded-full px-2 py-0.5 bg-secondary text-white whitespace-nowrap">
-                    {pack.badge}
-                  </span>
-                )}
-                <div className="font-heading text-sm">⚡ {pack.sparks}</div>
-                <div className="font-mono text-[11px] opacity-60">{busy === pack.id ? "..." : pack.priceLabel}</div>
-              </button>
-            ))}
+            {SPARKS_PACKS.map((pack) => {
+              const bonus = bonusPercent(pack);
+              return (
+                <button
+                  key={pack.id}
+                  onClick={() => startCheckout("sparks_pack", pack.id)}
+                  disabled={busy === pack.id}
+                  className="relative bg-surface border-2 border-outline rounded-sticker p-3 pt-4 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition disabled:opacity-50 text-center"
+                >
+                  {"badge" in pack && pack.badge ? (
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 font-heading text-[8px] uppercase tracking-widest rounded-full px-2 py-0.5 bg-secondary text-white whitespace-nowrap">
+                      {pack.badge}
+                    </span>
+                  ) : bonus > 0 ? (
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 font-heading text-[8px] uppercase tracking-widest rounded-full px-2 py-0.5 bg-green-500 text-white whitespace-nowrap">
+                      +{bonus}%
+                    </span>
+                  ) : null}
+                  <div className="font-heading text-sm">⚡ {pack.sparks}</div>
+                  <div className="font-mono text-[11px] opacity-60">{busy === pack.id ? "..." : pack.priceLabel}</div>
+                  {bonus > 0 && (
+                    <div className="font-mono text-[10px] font-bold text-green-600 mt-0.5">+{bonus}% de Sparks</div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
