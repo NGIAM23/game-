@@ -56,6 +56,12 @@ interface ProfileData {
   xp_boost_until: string | null;
 }
 
+interface ClanInfo {
+  clan_id: string;
+  name: string;
+  owner_id: string;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -74,6 +80,8 @@ export default function ProfilePage() {
   const [linkPassword, setLinkPassword] = useState("");
   const [linkBusy, setLinkBusy] = useState(false);
   const [linkNotice, setLinkNotice] = useState<string | null>(null);
+  const [clan, setClan] = useState<ClanInfo | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     setSoundOn(isSoundEnabled());
@@ -88,6 +96,7 @@ export default function ProfilePage() {
         return;
       }
       setIsAnonymous(session.session.user.is_anonymous ?? false);
+      setUserId(session.session.user.id);
       const { data } = await supabase
         .from("profiles")
         .select("pseudo, avatar_seed, total_xp, current_streak, streak_freezes, sparks, is_plus, xp_boost_until")
@@ -98,6 +107,9 @@ export default function ProfilePage() {
         setPseudoInput(data.pseudo ?? "");
         setSeedInput(data.avatar_seed ?? data.pseudo ?? "");
       }
+
+      const { data: clanData } = await supabase.rpc("get_my_clan");
+      setClan((clanData ?? [])[0] as ClanInfo | undefined ?? null);
 
       const { data: completions } = await supabase.from("task_completions").select("tasks(category)");
       const counts: Record<string, number> = {};
@@ -210,6 +222,21 @@ export default function ProfilePage() {
               <span>⚡ {profile.sparks}</span>
             </div>
           </motion.div>
+
+          {clan && (
+            <button
+              onClick={() => router.push("/clan")}
+              className="w-full flex items-center justify-between bg-surface border-2 border-outline rounded-sticker px-4 py-3 mb-6 shadow-[0_3px_0_0_#1A1A2E] active:translate-y-1 active:shadow-none transition text-left"
+            >
+              <div>
+                <div className="font-heading text-sm">🛡️ {clan.name}</div>
+                {clan.owner_id === userId && (
+                  <div className="font-mono text-[10px] uppercase tracking-widest opacity-60 mt-0.5">👑 Propriétaire</div>
+                )}
+              </div>
+              <span className="font-heading text-xs opacity-50">Voir →</span>
+            </button>
+          )}
 
           <WeeklyRecap />
           <button
