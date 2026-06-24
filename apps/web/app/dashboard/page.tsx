@@ -9,6 +9,7 @@ import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import SundayBanner from "@/components/SundayBanner";
 import CategoryIcon from "@/components/CategoryIcon";
+import QuestsPanel from "@/components/QuestsPanel";
 
 interface Profile {
   id: string;
@@ -197,7 +198,11 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mt-8 mb-3">Progression par catégorie</h2>
+      <div className="mt-8">
+        <QuestsPanel />
+      </div>
+
+      <h2 className="font-mono text-xs uppercase tracking-widest opacity-50 mt-2 mb-3">Progression par catégorie</h2>
       {(() => {
         const totalCompletions = Object.values(categoryCounts).reduce((sum, n) => sum + n, 0);
         return (
