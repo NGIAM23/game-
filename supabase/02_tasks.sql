@@ -28,6 +28,7 @@ on conflict (id) do nothing;
 
 alter table tasks enable row level security;
 
+drop policy if exists "Tasks are viewable by everyone" on tasks;
 create policy "Tasks are viewable by everyone"
   on tasks for select
   using (true);
@@ -45,19 +46,23 @@ create table if not exists task_completions (
 
 alter table task_completions enable row level security;
 
+drop policy if exists "Users can view their own completions" on task_completions;
 create policy "Users can view their own completions"
   on task_completions for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own completions" on task_completions;
 create policy "Users can insert their own completions"
   on task_completions for insert
   with check (auth.uid() = user_id);
 
 -- Aucune modification ni suppression possible (preuve d'historique immuable).
+drop policy if exists "Completions cannot be updated" on task_completions;
 create policy "Completions cannot be updated"
   on task_completions for update
   using (false);
 
+drop policy if exists "Completions cannot be deleted" on task_completions;
 create policy "Completions cannot be deleted"
   on task_completions for delete
   using (false);

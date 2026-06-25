@@ -9,6 +9,7 @@ create table if not exists seasons (
 
 alter table seasons enable row level security;
 
+drop policy if exists "Seasons are viewable by everyone" on seasons;
 create policy "Seasons are viewable by everyone"
   on seasons for select
   using (true);
@@ -29,6 +30,7 @@ create table if not exists battle_pass_rewards (
 
 alter table battle_pass_rewards enable row level security;
 
+drop policy if exists "Battle pass rewards are viewable by everyone" on battle_pass_rewards;
 create policy "Battle pass rewards are viewable by everyone"
   on battle_pass_rewards for select
   using (true);
@@ -87,6 +89,7 @@ create table if not exists battle_pass_claims (
 
 alter table battle_pass_claims enable row level security;
 
+drop policy if exists "Users can view their own battle pass claims" on battle_pass_claims;
 create policy "Users can view their own battle pass claims"
   on battle_pass_claims for select
   using (auth.uid() = user_id);

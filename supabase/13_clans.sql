@@ -12,6 +12,7 @@ create table if not exists clans (
 
 alter table clans enable row level security;
 
+drop policy if exists "Clans are viewable by everyone" on clans;
 create policy "Clans are viewable by everyone"
   on clans for select
   using (true);
@@ -25,6 +26,7 @@ create table if not exists clan_members (
 
 alter table clan_members enable row level security;
 
+drop policy if exists "Clan members are viewable by everyone" on clan_members;
 create policy "Clan members are viewable by everyone"
   on clan_members for select
   using (true);
@@ -38,6 +40,7 @@ create table if not exists clan_progress (
 
 alter table clan_progress enable row level security;
 
+drop policy if exists "Clan progress is viewable by everyone" on clan_progress;
 create policy "Clan progress is viewable by everyone"
   on clan_progress for select
   using (true);

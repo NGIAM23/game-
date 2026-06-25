@@ -51,6 +51,7 @@ create table if not exists duels (
 
 alter table duels enable row level security;
 
+drop policy if exists "Participants can view their duels" on duels;
 create policy "Participants can view their duels"
   on duels for select
   using (auth.uid() = challenger_id or auth.uid() = opponent_id);
@@ -63,6 +64,7 @@ create table if not exists duel_assignments (
 
 alter table duel_assignments enable row level security;
 
+drop policy if exists "Participants can view their duel missions" on duel_assignments;
 create policy "Participants can view their duel missions"
   on duel_assignments for select
   using (
@@ -83,6 +85,7 @@ create table if not exists duel_progress (
 
 alter table duel_progress enable row level security;
 
+drop policy if exists "Participants can view duel progress" on duel_progress;
 create policy "Participants can view duel progress"
   on duel_progress for select
   using (

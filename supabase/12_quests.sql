@@ -13,6 +13,7 @@ create table if not exists quests (
 
 alter table quests enable row level security;
 
+drop policy if exists "Quests are viewable by everyone" on quests;
 create policy "Quests are viewable by everyone"
   on quests for select
   using (true);
@@ -38,6 +39,7 @@ create table if not exists quest_progress (
 
 alter table quest_progress enable row level security;
 
+drop policy if exists "Users can view their own quest progress" on quest_progress;
 create policy "Users can view their own quest progress"
   on quest_progress for select
   using (auth.uid() = user_id);

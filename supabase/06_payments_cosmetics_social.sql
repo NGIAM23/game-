@@ -86,6 +86,7 @@ create table if not exists payments (
 
 alter table payments enable row level security;
 
+drop policy if exists "Users can view their own payments" on payments;
 create policy "Users can view their own payments"
   on payments for select
   using (auth.uid() = user_id);
@@ -101,6 +102,7 @@ create table if not exists cosmetics (
 
 alter table cosmetics enable row level security;
 
+drop policy if exists "Cosmetics are viewable by everyone" on cosmetics;
 create policy "Cosmetics are viewable by everyone"
   on cosmetics for select
   using (true);
@@ -124,6 +126,7 @@ create table if not exists profile_cosmetics (
 
 alter table profile_cosmetics enable row level security;
 
+drop policy if exists "Users can view their own cosmetics" on profile_cosmetics;
 create policy "Users can view their own cosmetics"
   on profile_cosmetics for select
   using (auth.uid() = user_id);
@@ -216,18 +219,22 @@ create table if not exists friends (
 
 alter table friends enable row level security;
 
+drop policy if exists "Users can view their own friend links" on friends;
 create policy "Users can view their own friend links"
   on friends for select
   using (auth.uid() = requester or auth.uid() = addressee);
 
+drop policy if exists "Users can send friend requests" on friends;
 create policy "Users can send friend requests"
   on friends for insert
   with check (auth.uid() = requester and requester <> addressee);
 
+drop policy if exists "Addressee can accept requests" on friends;
 create policy "Addressee can accept requests"
   on friends for update
   using (auth.uid() = addressee);
 
+drop policy if exists "Users can remove their own friend links" on friends;
 create policy "Users can remove their own friend links"
   on friends for delete
   using (auth.uid() = requester or auth.uid() = addressee);
@@ -244,10 +251,12 @@ create table if not exists notifications (
 
 alter table notifications enable row level security;
 
+drop policy if exists "Users can view their own notifications" on notifications;
 create policy "Users can view their own notifications"
   on notifications for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own notifications" on notifications;
 create policy "Users can update their own notifications"
   on notifications for update
   using (auth.uid() = user_id);
@@ -261,6 +270,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_friend_request_created on friends;
 create trigger on_friend_request_created
   after insert on friends
   for each row execute procedure notify_friend_request();
@@ -276,6 +286,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_friend_request_accepted on friends;
 create trigger on_friend_request_accepted
   after update on friends
   for each row execute procedure notify_friend_accepted();
