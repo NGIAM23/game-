@@ -57,10 +57,7 @@ export default function Sidebar() {
         </Link>
       )}
 
-      <nav
-        className="flex flex-col gap-2 flex-1 p-2.5 rounded-sticker border-2 border-outline"
-        style={{ background: "linear-gradient(180deg, #3B2E63 0%, #2A2150 70%, #1A1A2E 100%)" }}
-      >
+      <nav className="flex flex-col gap-2 flex-1 p-2.5 rounded-sticker border-2 border-outline bg-background">
         {TABS.map((tab) => {
           const active = pathname === tab.href;
           return (
@@ -71,12 +68,10 @@ export default function Sidebar() {
               style={{
                 background: active
                   ? "linear-gradient(180deg, #FFE17D 0%, #FFD43B 55%, #E8A800 100%)"
-                  : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
-                color: active ? "#1A1A2E" : "#FFF8E7",
+                  : "transparent",
+                color: "#1A1A2E",
                 borderColor: active ? "#1A1A2E" : "transparent",
-                boxShadow: active
-                  ? "0 3px 0 0 #1A1A2E, inset 0 2px 0 0 rgba(255,255,255,0.6)"
-                  : "inset 0 1px 0 0 rgba(255,255,255,0.08)",
+                boxShadow: active ? "0 3px 0 0 #1A1A2E, inset 0 2px 0 0 rgba(255,255,255,0.6)" : "none",
                 opacity: active ? 1 : 0.75,
               }}
             >
@@ -104,8 +99,8 @@ export default function Sidebar() {
                     boxShadow: "0 3px 0 0 #1A1A2E, inset 0 2px 0 0 rgba(255,255,255,0.6)",
                   }
                 : {
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
-                    color: "#FFF8E7",
+                    background: "transparent",
+                    color: "#1A1A2E",
                     borderColor: "transparent",
                     opacity: 0.75,
                   }

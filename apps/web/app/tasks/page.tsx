@@ -288,7 +288,8 @@ export default function TasksPage() {
           </motion.button>
         ) : (
           <span
-            className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 flex-shrink-0 opacity-50"
+            className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E] flex-shrink-0 cursor-not-allowed"
+            style={{ backgroundColor: "#FFD43B", color: "#1A1A2E" }}
             title="Preuve photo vérifiée par IA obligatoire avant de valider"
           >
             +{isWeekly ? xp : xp}
