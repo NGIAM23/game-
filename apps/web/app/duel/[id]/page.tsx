@@ -202,6 +202,7 @@ export default function DuelPage() {
         p_duel_id: duelId,
         p_lat: pos.coords.latitude,
         p_lng: pos.coords.longitude,
+        p_accuracy_m: pos.coords.accuracy,
       });
       if (rpcError) throw rpcError;
       await load();
@@ -234,6 +235,7 @@ export default function DuelPage() {
         p_duel_id: duelId,
         p_lat: pos.coords.latitude,
         p_lng: pos.coords.longitude,
+        p_accuracy_m: pos.coords.accuracy,
       });
       if (rpcError) throw rpcError;
       await load();

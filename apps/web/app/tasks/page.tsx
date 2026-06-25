@@ -105,6 +105,15 @@ export default function TasksPage() {
         return;
       }
 
+      try {
+        const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (detectedTz) {
+          await supabase.from("profiles").update({ user_timezone: detectedTz }).eq("id", session.session.user.id);
+        }
+      } catch {
+        // Détection du fuseau indisponible : on garde la valeur déjà en base.
+      }
+
       const { data: allTasks, error: tasksError } = await supabase
         .from("tasks")
         .select("id, category, label, base_xp, location, frequency");
