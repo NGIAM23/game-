@@ -232,9 +232,13 @@ export default function TasksPage() {
           <span className="block font-mono text-[10px] opacity-50 uppercase tracking-wide">
             {category.label} · {LOCATION_LABEL[task.location]}
           </span>
-          {verifyResult && !isDone && (
-            <span className={`block font-mono text-[10px] mt-0.5 ${verifyResult.verified ? "text-green-600" : "opacity-60"}`}>
-              {verifyResult.verified ? "✅ Preuve vérifiée par IA (+15% XP)" : `⚠️ ${verifyResult.reason || "Pas convaincant, tu peux quand même valider."}`}
+          {!isDone && (
+            <span className={`block font-mono text-[10px] mt-0.5 ${verifyResult?.verified ? "text-green-600" : "opacity-50"}`}>
+              {verifyResult?.verified
+                ? "✅ Preuve vérifiée par IA (+15% XP)"
+                : verifyResult
+                  ? `⚠️ ${verifyResult.reason || "Pas convaincant, réessaie avec une autre photo."}`
+                  : "📷 Prends une photo preuve vérifiée par IA pour valider"}
             </span>
           )}
         </div>
@@ -254,7 +258,7 @@ export default function TasksPage() {
             <button
               onClick={() => fileInputs.current[task.id]?.click()}
               disabled={verifying === task.id}
-              title="Ajouter une preuve photo (optionnel, vérifiée par IA)"
+              title="Prendre une preuve photo (obligatoire, vérifiée par IA)"
               className="w-9 h-9 flex items-center justify-center rounded-lg border-2 border-outline bg-background flex-shrink-0 disabled:opacity-50"
             >
               {verifying === task.id ? "⏳" : "📷"}
@@ -262,19 +266,34 @@ export default function TasksPage() {
           </>
         )}
 
-        <motion.button
-          key={isDone ? "done" : "todo"}
-          initial={{ scale: 0.6 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", bounce: 0.5 }}
-          disabled={isDone || pending === task.id}
-          onClick={() => completeTask(task.id, isWeekly)}
-          title={isDone ? "Tâche validée" : "Valider la tâche"}
-          className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E] flex-shrink-0 active:translate-y-0.5 active:shadow-none transition disabled:cursor-default"
-          style={{ backgroundColor: isDone ? "#2ED573" : "#FFD43B", color: isDone ? "#fff" : "#1A1A2E" }}
-        >
-          {isDone ? "✓" : pending === task.id ? "..." : `+${isWeekly ? xp : xp}`}
-        </motion.button>
+        {isDone ? (
+          <span
+            className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E] flex-shrink-0"
+            style={{ backgroundColor: "#2ED573", color: "#fff" }}
+          >
+            ✓
+          </span>
+        ) : verifyResult?.verified ? (
+          <motion.button
+            initial={{ scale: 0.6 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", bounce: 0.5 }}
+            disabled={pending === task.id}
+            onClick={() => completeTask(task.id, isWeekly)}
+            title="Valider la tâche"
+            className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E] flex-shrink-0 active:translate-y-0.5 active:shadow-none transition disabled:cursor-default"
+            style={{ backgroundColor: "#FFD43B", color: "#1A1A2E" }}
+          >
+            {pending === task.id ? "..." : `+${isWeekly ? xp : xp}`}
+          </motion.button>
+        ) : (
+          <span
+            className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 flex-shrink-0 opacity-50"
+            title="Preuve photo vérifiée par IA obligatoire avant de valider"
+          >
+            +{isWeekly ? xp : xp}
+          </span>
+        )}
       </motion.div>
     );
   }
@@ -294,7 +313,7 @@ export default function TasksPage() {
       <div className="flex items-center gap-2.5 bg-surface border-2 border-outline rounded-sticker px-3.5 py-2.5 mb-6 shadow-[0_3px_0_0_#1A1A2E]">
         <span className="text-lg">🤖</span>
         <p className="font-body text-xs leading-snug">
-          Ajoute une <strong>photo preuve</strong> (📷) sur une tâche : une IA la vérifie et te donne <strong>+15% XP</strong> si c'est convaincant.
+          Prends une <strong>photo preuve</strong> (📷) sur une tâche : une IA doit la vérifier avant que tu puisses la valider, et te donne <strong>+15% XP</strong> si c'est convaincant.
         </p>
       </div>
 
