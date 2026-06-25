@@ -21,6 +21,12 @@ interface Row {
   total_xp: number;
 }
 
+interface CityRow extends Row {
+  city: string | null;
+}
+
+const DEFAULT_CITY = "La Seyne-sur-Mer";
+
 interface SundayRow {
   pseudo: string;
   avatar_seed: string | null;
@@ -28,7 +34,7 @@ interface SundayRow {
 }
 
 const PODIUM_BG = ["#FFD43B", "#E8E8E8", "#F4B98A"];
-const TABS = ["Global", "Dimanche", "Amis", "Mon rang"];
+const TABS = ["Global", "Ville", "Dimanche", "Amis", "Mon rang"];
 
 export default function Leaderboard() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -39,6 +45,9 @@ export default function Leaderboard() {
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
   const [tab, setTab] = useState("Global");
+  const [cities, setCities] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
+  const [allCityRows, setAllCityRows] = useState<CityRow[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -61,6 +70,22 @@ export default function Leaderboard() {
       } else {
         setRows(data ?? []);
       }
+
+      const { data: cityData } = await supabase
+        .from("profiles")
+        .select("pseudo, avatar_seed, total_xp, city")
+        .not("pseudo", "is", null)
+        .not("city", "is", null)
+        .order("total_xp", { ascending: false })
+        .limit(500);
+      const fetchedCityRows = (cityData ?? []) as CityRow[];
+      const distinctCities = Array.from(new Set(fetchedCityRows.map((r) => r.city as string)));
+      setCities(
+        distinctCities.includes(DEFAULT_CITY)
+          ? [DEFAULT_CITY, ...distinctCities.filter((c) => c !== DEFAULT_CITY).sort()]
+          : distinctCities.sort()
+      );
+      setAllCityRows(fetchedCityRows);
 
       if (isSunday()) {
         const { data: sundayData } = await supabase.rpc("sunday_leaderboard");
@@ -95,6 +120,11 @@ export default function Leaderboard() {
       ? sundayRows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.sunday_xp }))
       : tab === "Amis"
       ? friendRows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.total_xp }))
+      : tab === "Ville"
+      ? allCityRows
+          .filter((r) => r.city === selectedCity)
+          .slice(0, 10)
+          .map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.total_xp }))
       : rows.map((r) => ({ pseudo: r.pseudo, avatar_seed: r.avatar_seed, xp: r.total_xp }));
 
   const [first, second, third, ...rest] = activeRows;
@@ -120,6 +150,23 @@ export default function Leaderboard() {
         ))}
       </div>
 
+      {tab === "Ville" && (
+        <div className="flex items-center justify-center gap-2 mb-5">
+          <span className="font-heading text-sm">🏙️</span>
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            className="font-body text-sm bg-surface border-2 border-outline rounded-sticker px-3 py-1.5 shadow-[0_2px_0_0_#1A1A2E]"
+          >
+            {(cities.includes(selectedCity) ? cities : [selectedCity, ...cities]).map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {tab !== "Mon rang" && (
         <div className="bg-secondary text-white border-[3px] border-outline rounded-sticker px-4 py-3 mb-6 shadow-[0_4px_0_0_#1A1A2E] flex items-center gap-3 max-w-2xl mx-auto">
           <span className="text-2xl">🏆</span>
@@ -140,6 +187,8 @@ export default function Leaderboard() {
         <p className="text-center opacity-60">La Course du Dimanche revient... dimanche. ☀️</p>
       ) : tab === "Amis" && activeRows.length === 0 ? (
         <p className="text-center opacity-60">Ajoute des amis pour les voir ici. 👥</p>
+      ) : tab === "Ville" && activeRows.length === 0 ? (
+        <p className="text-center opacity-60">Personne à {selectedCity} pour l'instant. Renseigne ta ville dans ton profil pour être le premier ! 🏙️</p>
       ) : activeRows.length === 0 ? (
         <p className="text-center opacity-60">Personne pour l'instant. Sois le premier !</p>
       ) : (

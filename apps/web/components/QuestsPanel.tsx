@@ -90,13 +90,25 @@ export default function QuestsPanel() {
       {weekly.length > 0 && (
         <>
           <h3 className="font-mono text-[10px] uppercase tracking-widest opacity-50 mb-2">Cette semaine</h3>
-          <div className="flex flex-col gap-2 mb-4">{weekly.map(renderQuest)}</div>
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 snap-x mb-4">
+            {weekly.map((q) => (
+              <div key={q.quest_id} className="snap-start flex-shrink-0 w-64">
+                {renderQuest(q)}
+              </div>
+            ))}
+          </div>
         </>
       )}
       {monthly.length > 0 && (
         <>
           <h3 className="font-mono text-[10px] uppercase tracking-widest opacity-50 mb-2">Ce mois-ci</h3>
-          <div className="flex flex-col gap-2">{monthly.map(renderQuest)}</div>
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 snap-x">
+            {monthly.map((q) => (
+              <div key={q.quest_id} className="snap-start flex-shrink-0 w-64">
+                {renderQuest(q)}
+              </div>
+            ))}
+          </div>
         </>
       )}
     </div>

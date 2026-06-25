@@ -54,6 +54,7 @@ interface ProfileData {
   sparks: number;
   is_plus: boolean;
   xp_boost_until: string | null;
+  city: string | null;
 }
 
 interface ClanInfo {
@@ -67,6 +68,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [pseudoInput, setPseudoInput] = useState("");
   const [seedInput, setSeedInput] = useState("");
+  const [cityInput, setCityInput] = useState("");
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -99,13 +101,14 @@ export default function ProfilePage() {
       setUserId(session.session.user.id);
       const { data } = await supabase
         .from("profiles")
-        .select("pseudo, avatar_seed, total_xp, current_streak, streak_freezes, sparks, is_plus, xp_boost_until")
+        .select("pseudo, avatar_seed, total_xp, current_streak, streak_freezes, sparks, is_plus, xp_boost_until, city")
         .eq("id", session.session.user.id)
         .single();
       if (data) {
         setProfile(data);
         setPseudoInput(data.pseudo ?? "");
         setSeedInput(data.avatar_seed ?? data.pseudo ?? "");
+        setCityInput(data.city ?? "");
       }
 
       const { data: clanData } = await supabase.rpc("get_my_clan");
@@ -130,13 +133,13 @@ export default function ProfilePage() {
     setNotice(null);
     const { error } = await supabase
       .from("profiles")
-      .update({ pseudo: pseudoInput.trim(), avatar_seed: seedInput.trim() })
+      .update({ pseudo: pseudoInput.trim(), avatar_seed: seedInput.trim(), city: cityInput.trim() || null })
       .eq("pseudo", profile.pseudo);
     setSaving(false);
     if (error) {
       setNotice("Ce pseudo est déjà pris ou invalide.");
     } else {
-      setProfile({ ...profile, pseudo: pseudoInput.trim(), avatar_seed: seedInput.trim() });
+      setProfile({ ...profile, pseudo: pseudoInput.trim(), avatar_seed: seedInput.trim(), city: cityInput.trim() || null });
       setNotice("Profil mis à jour !");
     }
   }
@@ -337,6 +340,16 @@ export default function ProfilePage() {
                   onChange={(e) => setSeedInput(e.target.value)}
                   className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
                 />
+              </div>
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-widest opacity-50 mb-1">Ville</label>
+                <input
+                  value={cityInput}
+                  onChange={(e) => setCityInput(e.target.value)}
+                  placeholder="La Seyne-sur-Mer"
+                  className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
+                />
+                <p className="font-mono text-[10px] opacity-40 -mt-2 mb-3">Pour apparaître dans le classement de ta ville.</p>
               </div>
             </div>
 
