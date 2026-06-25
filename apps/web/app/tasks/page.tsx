@@ -225,11 +225,7 @@ export default function TasksPage() {
         >
           <CategoryIcon id={task.category} size={24} />
         </span>
-        <button
-          disabled={isDone || pending === task.id}
-          onClick={() => completeTask(task.id, isWeekly)}
-          className="flex-1 text-left select-none disabled:cursor-default"
-        >
+        <div className="flex-1 text-left select-none">
           <span className={`block font-body font-semibold text-sm ${isDone ? "line-through opacity-60" : ""}`}>
             {task.label}
           </span>
@@ -241,7 +237,7 @@ export default function TasksPage() {
               {verifyResult.verified ? "✅ Preuve vérifiée par IA (+15% XP)" : `⚠️ ${verifyResult.reason || "Pas convaincant, tu peux quand même valider."}`}
             </span>
           )}
-        </button>
+        </div>
 
         {!isDone && (
           <>
@@ -266,16 +262,19 @@ export default function TasksPage() {
           </>
         )}
 
-        <motion.span
+        <motion.button
           key={isDone ? "done" : "todo"}
           initial={{ scale: 0.6 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", bounce: 0.5 }}
-          className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E] flex-shrink-0"
+          disabled={isDone || pending === task.id}
+          onClick={() => completeTask(task.id, isWeekly)}
+          title={isDone ? "Tâche validée" : "Valider la tâche"}
+          className="font-heading text-sm border-2 border-outline rounded-full px-2.5 py-1 shadow-[0_2px_0_0_#1A1A2E] flex-shrink-0 active:translate-y-0.5 active:shadow-none transition disabled:cursor-default"
           style={{ backgroundColor: isDone ? "#2ED573" : "#FFD43B", color: isDone ? "#fff" : "#1A1A2E" }}
         >
-          {isDone ? "✓" : `+${isWeekly ? xp : xp}`}
-        </motion.span>
+          {isDone ? "✓" : pending === task.id ? "..." : `+${isWeekly ? xp : xp}`}
+        </motion.button>
       </motion.div>
     );
   }
