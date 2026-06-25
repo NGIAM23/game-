@@ -352,7 +352,7 @@ begin
     v_xp := round(v_xp * 1.15);
   end if;
 
-  v_sparks := greatest(1, v_xp / 5);
+  v_sparks := greatest(1, round(v_xp / 5.0)::integer);
   v_period := case when v_frequency = 'weekly' then date_trunc('week', current_date)::date else current_date end;
 
   insert into task_completions (user_id, task_id, xp_awarded, completed_on, verified)

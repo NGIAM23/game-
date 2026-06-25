@@ -67,7 +67,7 @@ begin
     v_xp := round(v_xp * 1.1);
   end if;
 
-  v_sparks := greatest(1, v_xp / 5);
+  v_sparks := greatest(1, round(v_xp / 5.0)::integer);
 
   insert into task_completions (user_id, task_id, xp_awarded)
   values (auth.uid(), p_task_id, v_xp);

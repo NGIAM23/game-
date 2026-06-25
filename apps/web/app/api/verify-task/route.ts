@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { supabaseForUser } from "@/lib/supabaseServer";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 export async function POST(req: NextRequest) {
-  const { taskLabel, imageBase64, mimeType, expectedEvidence } = await req.json();
+  const { taskLabel, imageBase64, mimeType, expectedEvidence, accessToken } = await req.json();
+  if (!accessToken) return NextResponse.json({ error: "Missing session" }, { status: 401 });
+
+  const supabase = supabaseForUser(accessToken);
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+
   if (!taskLabel || !imageBase64) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
+  }
+  if (mimeType && !ALLOWED_MIME_TYPES.includes(mimeType)) {
+    return NextResponse.json({ error: "Unsupported mime type" }, { status: 400 });
   }
 
   try {

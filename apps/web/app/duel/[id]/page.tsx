@@ -262,10 +262,16 @@ export default function DuelPage() {
     setVerifying(missionId);
     try {
       const imageBase64 = await fileToBase64(file);
+      const { data: session } = await supabase.auth.getSession();
       const res = await fetch("/api/verify-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskLabel: label, imageBase64, mimeType: file.type }),
+        body: JSON.stringify({
+          taskLabel: label,
+          imageBase64,
+          mimeType: file.type,
+          accessToken: session.session?.access_token,
+        }),
       });
       const data = await res.json();
       const verified = !!data.verified;

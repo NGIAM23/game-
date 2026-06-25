@@ -179,10 +179,17 @@ export default function TasksPage() {
     try {
       const imageBase64 = await fileToBase64(file);
       const expectedEvidence = getProofHint(taskId, category);
+      const { data: session } = await supabase.auth.getSession();
       const res = await fetch("/api/verify-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskLabel: label, imageBase64, mimeType: file.type, expectedEvidence }),
+        body: JSON.stringify({
+          taskLabel: label,
+          imageBase64,
+          mimeType: file.type,
+          expectedEvidence,
+          accessToken: session.session?.access_token,
+        }),
       });
       const data = await res.json();
       setVerifyResults((prev) => ({ ...prev, [taskId]: { verified: !!data.verified, reason: data.reason ?? "" } }));

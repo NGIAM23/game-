@@ -26,26 +26,35 @@ begin
     raise exception 'Unknown task %', p_task_id;
   end if;
 
-  v_xp := case when v_category = 'detoxEcran' then v_base_xp * 3 else v_base_xp end;
+  -- Tous les multiplicateurs sont combinés en un seul facteur puis appliqués
+  -- en une fois : appliquer round() après chaque étape ferait dériver le
+  -- résultat selon l'ordre des bonus (ex: Plus + dimanche + vérifiée).
+  declare
+    v_multiplier numeric := 1;
+  begin
+    v_xp := case when v_category = 'detoxEcran' then v_base_xp * 3 else v_base_xp end;
 
-  if extract(dow from current_date) = 0 then
-    v_xp := v_xp * 2;
-  end if;
+    if extract(dow from current_date) = 0 then
+      v_multiplier := v_multiplier * 2;
+    end if;
 
-  select is_plus, xp_boost_until into v_is_plus, v_boost_until from profiles where id = auth.uid();
-  if v_is_plus then
-    v_xp := round(v_xp * 1.1);
-  end if;
+    select is_plus, xp_boost_until into v_is_plus, v_boost_until from profiles where id = auth.uid();
+    if v_is_plus then
+      v_multiplier := v_multiplier * 1.1;
+    end if;
 
-  if v_boost_until is not null and v_boost_until > now() then
-    v_xp := v_xp * 2;
-  end if;
+    if v_boost_until is not null and v_boost_until > now() then
+      v_multiplier := v_multiplier * 2;
+    end if;
 
-  if p_verified then
-    v_xp := round(v_xp * 1.15);
-  end if;
+    if p_verified then
+      v_multiplier := v_multiplier * 1.15;
+    end if;
 
-  v_sparks := greatest(1, v_xp / 5);
+    v_xp := round(v_xp * v_multiplier)::integer;
+  end;
+
+  v_sparks := greatest(1, round(v_xp / 5.0)::integer);
   v_period := case when v_frequency = 'weekly' then date_trunc('week', current_date)::date else current_date end;
 
   insert into task_completions (user_id, task_id, xp_awarded, completed_on, verified)

@@ -53,6 +53,15 @@ create policy "Users can insert their own completions"
   on task_completions for insert
   with check (auth.uid() = user_id);
 
+-- Aucune modification ni suppression possible (preuve d'historique immuable).
+create policy "Completions cannot be updated"
+  on task_completions for update
+  using (false);
+
+create policy "Completions cannot be deleted"
+  on task_completions for delete
+  using (false);
+
 -- Complète une tâche aujourd'hui et crédite l'XP au profil de façon atomique.
 -- Détox écran = XP ×3 (signature, cf docs/22_RECAP_FINAL.md §3).
 create or replace function complete_task(p_task_id text)

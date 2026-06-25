@@ -107,12 +107,6 @@ begin
 
   v_period := quest_period_start(v_scope);
 
-  select claimed into v_already_claimed from quest_progress
-  where user_id = auth.uid() and quest_id = p_quest_id and period_start = v_period;
-  if v_already_claimed then
-    raise exception 'Quest already claimed';
-  end if;
-
   v_progress := case v_kind
     when 'total_tasks' then (
       select count(*)::integer from task_completions tc
@@ -136,7 +130,12 @@ begin
 
   insert into quest_progress (user_id, quest_id, period_start, claimed)
   values (auth.uid(), p_quest_id, v_period, true)
-  on conflict (user_id, quest_id, period_start) do update set claimed = true;
+  on conflict (user_id, quest_id, period_start) do nothing
+  returning claimed into v_already_claimed;
+
+  if v_already_claimed is null then
+    raise exception 'Quest already claimed';
+  end if;
 
   update profiles set total_xp = total_xp + v_reward_xp, sparks = sparks + v_reward_sparks where id = auth.uid();
 end;

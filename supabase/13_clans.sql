@@ -158,11 +158,6 @@ begin
   select weekly_target, reward_xp, reward_sparks into v_target, v_reward_xp, v_reward_sparks from clans where id = v_clan_id;
   v_period := date_trunc('week', current_date)::date;
 
-  select claimed into v_already_claimed from clan_progress where clan_id = v_clan_id and period_start = v_period;
-  if v_already_claimed then
-    raise exception 'Already claimed this week';
-  end if;
-
   select count(*)::integer into v_progress from task_completions tc
   join clan_members cm on cm.user_id = tc.user_id
   where cm.clan_id = v_clan_id and tc.completed_on >= v_period;
@@ -171,8 +166,17 @@ begin
     raise exception 'Goal not reached yet';
   end if;
 
-  insert into clan_progress (clan_id, period_start, claimed) values (v_clan_id, v_period, true)
-  on conflict (clan_id, period_start) do update set claimed = true;
+  -- Réclamation atomique : seule la requête qui insère réellement la ligne
+  -- (et non un conflit) peut créditer les récompenses, ce qui empêche deux
+  -- appels quasi simultanés de créditer le clan deux fois.
+  insert into clan_progress (clan_id, period_start, claimed)
+  values (v_clan_id, v_period, true)
+  on conflict (clan_id, period_start) do nothing
+  returning claimed into v_already_claimed;
+
+  if v_already_claimed is null then
+    raise exception 'Already claimed this week';
+  end if;
 
   update profiles set total_xp = total_xp + v_reward_xp, sparks = sparks + v_reward_sparks
   where id in (select user_id from clan_members where clan_id = v_clan_id);

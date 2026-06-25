@@ -36,7 +36,7 @@ begin
     v_xp := round(v_xp * 1.15);
   end if;
 
-  v_sparks := greatest(1, v_xp / 5);
+  v_sparks := greatest(1, round(v_xp / 5.0)::integer);
   v_period := case when v_frequency = 'weekly' then date_trunc('week', current_date)::date else current_date end;
 
   insert into task_completions (user_id, task_id, xp_awarded, completed_on, verified)
@@ -187,6 +187,13 @@ begin
   insert into payments (user_id, stripe_session_id, kind, sparks_awarded, amount_cents)
   values (p_user_id, p_stripe_session_id, p_kind, p_sparks_awarded, p_amount_cents)
   on conflict (stripe_session_id) do nothing;
+
+  -- Stripe peut redélivrer le même webhook plusieurs fois : si la session a
+  -- déjà été enregistrée, l'insert ci-dessus ne fait rien et on ne doit pas
+  -- créditer une seconde fois.
+  if not found then
+    return;
+  end if;
 
   if p_kind = 'plus_subscription' then
     update profiles set is_plus = true where id = p_user_id;
