@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { CATEGORIES, categoryColors, isSunday, levelFromTotalXp, type CategoryId } from "@luavio/shared";
+import { CATEGORIES, categoryColors, getProofHint, isSunday, levelFromTotalXp, type CategoryId } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import SundayBanner from "@/components/SundayBanner";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -93,6 +93,7 @@ export default function TasksPage() {
   const [xpToday, setXpToday] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [totalXp, setTotalXp] = useState(0);
+  const [openHintId, setOpenHintId] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
   const completingRef = useRef<Set<string>>(new Set());
 
@@ -172,15 +173,16 @@ export default function TasksPage() {
     }
   }
 
-  async function handlePhoto(taskId: string, label: string, file: File | undefined) {
+  async function handlePhoto(taskId: string, label: string, category: CategoryId, file: File | undefined) {
     if (!file) return;
     setVerifying(taskId);
     try {
       const imageBase64 = await fileToBase64(file);
+      const expectedEvidence = getProofHint(taskId, category);
       const res = await fetch("/api/verify-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskLabel: label, imageBase64, mimeType: file.type }),
+        body: JSON.stringify({ taskLabel: label, imageBase64, mimeType: file.type, expectedEvidence }),
       });
       const data = await res.json();
       setVerifyResults((prev) => ({ ...prev, [taskId]: { verified: !!data.verified, reason: data.reason ?? "" } }));
@@ -206,6 +208,8 @@ export default function TasksPage() {
     const xp =
       (task.category === "detoxEcran" ? task.base_xp * 3 : task.base_xp) * (isSunday() ? 2 : 1);
     const verifyResult = verifyResults[task.id];
+    const hint = getProofHint(task.id, task.category);
+    const hintOpen = openHintId === task.id;
 
     return (
       <motion.div
@@ -241,10 +245,22 @@ export default function TasksPage() {
                   : "📷 Prends une photo preuve vérifiée par IA pour valider"}
             </span>
           )}
+          {!isDone && hintOpen && (
+            <p className="mt-1.5 font-body text-[11px] leading-snug bg-background border-2 border-outline rounded-lg px-2 py-1.5">
+              💡 {hint}
+            </p>
+          )}
         </div>
 
         {!isDone && (
           <>
+            <button
+              onClick={() => setOpenHintId(hintOpen ? null : task.id)}
+              title="Quelle preuve fournir ?"
+              className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-outline bg-background flex-shrink-0 font-heading text-xs"
+            >
+              ⓘ
+            </button>
             <input
               ref={(el) => {
                 fileInputs.current[task.id] = el;
@@ -253,7 +269,7 @@ export default function TasksPage() {
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => handlePhoto(task.id, task.label, e.target.files?.[0])}
+              onChange={(e) => handlePhoto(task.id, task.label, task.category, e.target.files?.[0])}
             />
             <button
               onClick={() => fileInputs.current[task.id]?.click()}
