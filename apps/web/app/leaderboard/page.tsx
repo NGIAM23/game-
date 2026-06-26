@@ -9,6 +9,8 @@ import {
   RANK_TIERS,
   tierForLevel,
   subTierForLevel,
+  VAR_CITIES,
+  PILOT_CITY,
 } from "@luavio/shared";
 import { supabase } from "@/lib/supabase";
 import Shell from "@/components/Shell";
@@ -25,7 +27,7 @@ interface CityRow extends Row {
   city: string | null;
 }
 
-const DEFAULT_CITY = "La Seyne-sur-Mer";
+const DEFAULT_CITY = PILOT_CITY;
 
 interface SundayRow {
   pseudo: string;
@@ -80,11 +82,8 @@ export default function Leaderboard() {
         .limit(500);
       const fetchedCityRows = (cityData ?? []) as CityRow[];
       const distinctCities = Array.from(new Set(fetchedCityRows.map((r) => r.city as string)));
-      setCities(
-        distinctCities.includes(DEFAULT_CITY)
-          ? [DEFAULT_CITY, ...distinctCities.filter((c) => c !== DEFAULT_CITY).sort()]
-          : distinctCities.sort()
-      );
+      const otherCities = Array.from(new Set([...VAR_CITIES, ...distinctCities].filter((c) => c !== DEFAULT_CITY))).sort();
+      setCities([DEFAULT_CITY, ...otherCities]);
       setAllCityRows(fetchedCityRows);
 
       if (isSunday()) {
@@ -160,7 +159,7 @@ export default function Leaderboard() {
           >
             {(cities.includes(selectedCity) ? cities : [selectedCity, ...cities]).map((c) => (
               <option key={c} value={c}>
-                {c}
+                {c === PILOT_CITY ? `🏆 ${c} (ville pilote)` : c}
               </option>
             ))}
           </select>

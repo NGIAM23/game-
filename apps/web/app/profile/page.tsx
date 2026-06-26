@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { levelFromTotalXp, rankFromLevel, randomAvatarSeed, CATEGORIES, categoryColors } from "@luavio/shared";
+import { levelFromTotalXp, rankFromLevel, randomAvatarSeed, CATEGORIES, categoryColors, VAR_CITIES, PILOT_CITY } from "@luavio/shared";
 import Shell from "@/components/Shell";
 import Avatar from "@/components/Avatar";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -343,13 +343,30 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="block font-mono text-[10px] uppercase tracking-widest opacity-50 mb-1">Ville</label>
-                <input
-                  value={cityInput}
-                  onChange={(e) => setCityInput(e.target.value)}
-                  placeholder="La Seyne-sur-Mer"
-                  className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
-                />
-                <p className="font-mono text-[10px] opacity-40 -mt-2 mb-3">Pour apparaître dans le classement de ta ville.</p>
+                <select
+                  value={VAR_CITIES.includes(cityInput as typeof VAR_CITIES[number]) ? cityInput : cityInput ? "Autre" : ""}
+                  onChange={(e) => setCityInput(e.target.value === "Autre" ? "" : e.target.value)}
+                  className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-2"
+                >
+                  <option value="" disabled>
+                    Choisis ta ville
+                  </option>
+                  {VAR_CITIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c === PILOT_CITY ? `🏆 ${c} (ville pilote)` : c}
+                    </option>
+                  ))}
+                  <option value="Autre">Autre ville…</option>
+                </select>
+                {!VAR_CITIES.includes(cityInput as typeof VAR_CITIES[number]) && (
+                  <input
+                    value={cityInput}
+                    onChange={(e) => setCityInput(e.target.value)}
+                    placeholder="Nom de ta ville"
+                    className="w-full bg-background border-2 border-outline rounded-sticker px-3 py-2 text-sm font-body mb-3"
+                  />
+                )}
+                <p className="font-mono text-[10px] opacity-40 -mt-1 mb-3">Pour apparaître dans le classement de ta ville.</p>
               </div>
             </div>
 
